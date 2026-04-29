@@ -18,10 +18,12 @@ ModuleDestructor initializeAbstractSyntaxTreeModule() {
 	return _shutdownAbstractSyntaxTreeModule;
 }
 
-/* ── Helpers ──────────────────────────────────────────────────────── */
+/* ── Helper ──────────────────────────────────────────────────────── */
 
 static char * _copyString(const char * src) {
-	if (src == NULL) return NULL;
+	if(src == NULL) {
+		return NULL;
+	}
 	char * copy = (char *) calloc(strlen(src) + 1, sizeof(char));
 	strcpy(copy, src);
 	return copy;
@@ -78,7 +80,7 @@ void appendStatement(StatementList * list, Statement * stmt) {
 	}
 }
 
-/* ── Statement constructors ───────────────────────────────────────── */
+/* ── Helper ──────────────────────────────────────────────────────── */
 
 static Statement * _allocStatement(StatementType type) {
 	Statement * s = calloc(1, sizeof(Statement));
@@ -86,75 +88,77 @@ static Statement * _allocStatement(StatementType type) {
 	return s;
 }
 
+/* ── Statement constructors ───────────────────────────────────────── */
+
 Statement * createDialogueStatement(char * actorId, char * text) {
-	Statement * s         = _allocStatement(STMT_DIALOGUE);
-	s->dialogue           = calloc(1, sizeof(DialogueStatement));
+	Statement * s = _allocStatement(STMT_DIALOGUE);
+	s->dialogue = calloc(1, sizeof(DialogueStatement));
 	s->dialogue->actorId  = _copyString(actorId);
-	s->dialogue->text     = _copyString(text);
+	s->dialogue->text = _copyString(text);
 	return s;
 }
 
 Statement * createShowStatement(ResourceDisplayType type, char * resourceId) {
-	Statement * s        = _allocStatement(STMT_SHOW);
-	s->show              = calloc(1, sizeof(ShowStatement));
+	Statement * s = _allocStatement(STMT_SHOW);
+	s->show = calloc(1, sizeof(ShowStatement));
 	s->show->displayType = type;
-	s->show->resourceId  = _copyString(resourceId);
+	s->show->resourceId = _copyString(resourceId);
 	return s;
 }
 
 Statement * createHideStatement(ResourceDisplayType type, char * resourceId) {
-	Statement * s        = _allocStatement(STMT_HIDE);
-	s->hide              = calloc(1, sizeof(HideStatement));
+	Statement * s = _allocStatement(STMT_HIDE);
+	s->hide = calloc(1, sizeof(HideStatement));
 	s->hide->displayType = type;
 	s->hide->resourceId  = _copyString(resourceId);
 	return s;
 }
 
 Statement * createPlayStatement(ResourceAudioType type, char * resourceId) {
-	Statement * s       = _allocStatement(STMT_PLAY);
-	s->play             = calloc(1, sizeof(PlayStatement));
+	Statement * s = _allocStatement(STMT_PLAY);
+	s->play = calloc(1, sizeof(PlayStatement));
 	s->play->audioType  = type;
 	s->play->resourceId = _copyString(resourceId);
 	return s;
 }
 
 Statement * createStopStatement(ResourceAudioType type, char * resourceId) {
-	Statement * s       = _allocStatement(STMT_STOP);
-	s->stop             = calloc(1, sizeof(StopStatement));
+	Statement * s = _allocStatement(STMT_STOP);
+	s->stop = calloc(1, sizeof(StopStatement));
 	s->stop->audioType  = type;
 	s->stop->resourceId = _copyString(resourceId);
 	return s;
 }
 
 Statement * createGotoStatement(char * sceneName) {
-	Statement * s         = _allocStatement(STMT_GOTO);
-	s->goto_              = calloc(1, sizeof(GotoStatement));
-	s->goto_->sceneName   = _copyString(sceneName);
+	Statement * s = _allocStatement(STMT_GOTO);
+	s->goto_ = calloc(1, sizeof(GotoStatement));
+	s->goto_->sceneName = _copyString(sceneName);
 	return s;
 }
 
 Statement * createSetStatement(char * identifier, AssignOp op, Expression * expr) {
-	Statement * s       = _allocStatement(STMT_SET);
-	s->set              = calloc(1, sizeof(SetStatement));
-	s->set->identifier  = _copyString(identifier);
-	s->set->op          = op;
-	s->set->expr        = expr;
+	Statement * s = _allocStatement(STMT_SET);
+	s->set = calloc(1, sizeof(SetStatement));
+	s->set->identifier = _copyString(identifier);
+	s->set->op = op;
+	s->set->expr = expr;
 	return s;
 }
 
 Statement * createChoiceStatement(ChoiceOption * options) {
-	Statement * s      = _allocStatement(STMT_CHOICE);
-	s->choice          = calloc(1, sizeof(ChoiceStatement));
+	Statement * s = _allocStatement(STMT_CHOICE);
+	s->choice = calloc(1, sizeof(ChoiceStatement));
 	s->choice->options = options;
 	return s;
 }
 
 Statement * createIfStatement(Condition * cond, StatementList * thenBlock, StatementList * elseBlock) {
-	Statement * s           = _allocStatement(STMT_IF);
-	s->if_                  = calloc(1, sizeof(IfStatement));
-	s->if_->condition       = cond;
-	s->if_->thenBlock       = thenBlock;
-	s->if_->elseBlock       = elseBlock;
+	Statement * s = _allocStatement(STMT_IF);
+	s->if_ = calloc(1, sizeof(IfStatement));
+	s->if_->condition = cond;
+	s->if_->thenBlock = thenBlock;
+	s->if_->elseBlock = elseBlock;
 	return s;
 }
 
@@ -176,7 +180,9 @@ void appendChoiceOption(ChoiceOption ** head, ChoiceOption * option) {
 		*head = option;
 	} else {
 		ChoiceOption * cur = *head;
-		while (cur->next != NULL) cur = cur->next;
+		while (cur->next != NULL){
+			cur = cur->next;
+		}
 		cur->next = option;
 	}
 }
@@ -200,47 +206,47 @@ void appendDeclaration(DeclarationList * list, Declaration * decl) {
 /* ── Declaration constructors ─────────────────────────────────────── */
 
 Declaration * createCharacterDeclaration(char * displayName, char * identifier, char * color) {
-	Declaration * d           = calloc(1, sizeof(Declaration));
-	d->type                   = DECL_CHARACTER;
-	d->character              = calloc(1, sizeof(CharacterDeclaration));
+	Declaration * d = calloc(1, sizeof(Declaration));
+	d->type = DECL_CHARACTER;
+	d->character = calloc(1, sizeof(CharacterDeclaration));
 	d->character->displayName = _copyString(displayName);
-	d->character->identifier  = _copyString(identifier);
-	d->character->color       = _copyString(color);
+	d->character->identifier = _copyString(identifier);
+	d->character->color = _copyString(color);
 	return d;
 }
 
 Declaration * createAssetDeclaration(char * identifier, char * filePath) {
-	Declaration * d      = calloc(1, sizeof(Declaration));
-	d->type              = DECL_ASSET;
-	d->asset             = calloc(1, sizeof(AssetDeclaration));
+	Declaration * d = calloc(1, sizeof(Declaration));
+	d->type = DECL_ASSET;
+	d->asset = calloc(1, sizeof(AssetDeclaration));
 	d->asset->identifier = _copyString(identifier);
-	d->asset->filePath   = _copyString(filePath);
+	d->asset->filePath = _copyString(filePath);
 	return d;
 }
 
 Declaration * createSetDeclaration(char * identifier, AssignOp op, Expression * expr) {
-	Declaration * d     = calloc(1, sizeof(Declaration));
-	d->type             = DECL_SET;
-	d->set              = calloc(1, sizeof(SetStatement));
-	d->set->identifier  = _copyString(identifier);
-	d->set->op          = op;
-	d->set->expr        = expr;
+	Declaration * d = calloc(1, sizeof(Declaration));
+	d->type = DECL_SET;
+	d->set = calloc(1, sizeof(SetStatement));
+	d->set->identifier = _copyString(identifier);
+	d->set->op = op;
+	d->set->expr = expr;
 	return d;
 }
 
 Declaration * createSceneDeclaration(char * name, StatementList * body) {
-	Declaration * d    = calloc(1, sizeof(Declaration));
-	d->type            = DECL_SCENE;
-	d->scene           = calloc(1, sizeof(SceneDeclaration));
-	d->scene->name     = _copyString(name);
-	d->scene->body     = body;
+	Declaration * d = calloc(1, sizeof(Declaration));
+	d->type = DECL_SCENE;
+	d->scene = calloc(1, sizeof(SceneDeclaration));
+	d->scene->name = _copyString(name);
+	d->scene->body = body;
 	return d;
 }
 
 /* ── Program ──────────────────────────────────────────────────────── */
 
 Program * createProgram(DeclarationList * declarations) {
-	Program * p     = calloc(1, sizeof(Program));
+	Program * p = calloc(1, sizeof(Program));
 	p->declarations = declarations;
 	return p;
 }
@@ -248,8 +254,12 @@ Program * createProgram(DeclarationList * declarations) {
 /* ── Destructors ──────────────────────────────────────────────────── */
 
 void destroyExpression(Expression * expr) {
-	if (expr == NULL) return;
-	if (expr->type == EXPR_IDENTIFIER) free(expr->identifier);
+	if (expr == NULL) {
+		return;
+	}
+	if(expr->type == EXPR_IDENTIFIER) {
+		free(expr->identifier);
+	}
 	if (expr->type == EXPR_BINARY) {
 		destroyExpression(expr->binary.left);
 		destroyExpression(expr->binary.right);
@@ -258,7 +268,9 @@ void destroyExpression(Expression * expr) {
 }
 
 void destroyCondition(Condition * cond) {
-	if (cond == NULL) return;
+	if (cond == NULL){
+		return;
+	}
 	destroyExpression(cond->left);
 	destroyExpression(cond->right);
 	free(cond);
@@ -275,7 +287,9 @@ void destroyChoiceOption(ChoiceOption * opt) {
 }
 
 void destroyStatement(Statement * stmt) {
-	if (stmt == NULL) return;
+	if (stmt == NULL){
+		return;
+	}
 	switch (stmt->type) {
 		case STMT_DIALOGUE:
 			free(stmt->dialogue->actorId);
@@ -324,7 +338,9 @@ void destroyStatement(Statement * stmt) {
 }
 
 void destroyStatementList(StatementList * list) {
-	if (list == NULL) return;
+	if (list == NULL){
+		return;
+	}
 	Statement * cur = list->head;
 	while (cur != NULL) {
 		Statement * next = cur->next;
@@ -335,7 +351,9 @@ void destroyStatementList(StatementList * list) {
 }
 
 void destroyDeclaration(Declaration * decl) {
-	if (decl == NULL) return;
+	if (decl == NULL){
+		return;
+	}
 	switch (decl->type) {
 		case DECL_CHARACTER:
 			free(decl->character->displayName);
@@ -363,7 +381,9 @@ void destroyDeclaration(Declaration * decl) {
 }
 
 void destroyDeclarationList(DeclarationList * list) {
-	if (list == NULL) return;
+	if (list == NULL){
+		return;
+	}
 	Declaration * cur = list->head;
 	while (cur != NULL) {
 		Declaration * next = cur->next;
@@ -375,7 +395,9 @@ void destroyDeclarationList(DeclarationList * list) {
 
 void destroyProgram(Program * program) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (program == NULL) return;
+	if (program == NULL){
+		return;
+	}
 	destroyDeclarationList(program->declarations);
 	free(program);
 }

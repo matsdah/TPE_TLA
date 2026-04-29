@@ -41,17 +41,43 @@ typedef struct Program Program;
 
 /* ── Enums ────────────────────────────────────────────────────────── */
 
-enum AssignOp { ASSIGN_OP, ASSIGN_ADD_OP, ASSIGN_SUB_OP };
+enum AssignOp { 
+	ASSIGN_OP, 			// =
+	ASSIGN_ADD_OP, 		// +=
+	ASSIGN_SUB_OP 		// -=
+};
 
-enum ComparisonOp { CMP_LT, CMP_GT, CMP_LE, CMP_GE, CMP_EQ, CMP_NE };
+enum ComparisonOp { 
+	CMP_LT, 			// <
+	CMP_GT, 			// >
+	CMP_LE, 			// <=
+	CMP_GE, 			// >=
+	CMP_EQ, 			// ==
+	CMP_NE 				// !=			
+};
 
-enum ArithOp { ARITH_ADD, ARITH_SUB, ARITH_MUL, ARITH_DIV };
+enum ArithOp { 
+	ARITH_ADD, 			// +
+	ARITH_SUB, 			// -
+	ARITH_MUL, 			// *
+	ARITH_DIV 			// /
+};
 
-enum ResourceDisplayType { DISPLAY_BACKGROUND, DISPLAY_SPRITE };
+enum ResourceDisplayType { 
+	DISPLAY_BACKGROUND,
+	DISPLAY_SPRITE 
+};
 
-enum ResourceAudioType { AUDIO_MUSIC, AUDIO_SOUND };
+enum ResourceAudioType { 
+	AUDIO_MUSIC, 
+	AUDIO_SOUND 
+};
 
-enum ExpressionType { EXPR_INTEGER, EXPR_IDENTIFIER, EXPR_BINARY };
+enum ExpressionType { 
+	EXPR_INTEGER, 
+	EXPR_IDENTIFIER, 
+	EXPR_BINARY 
+};
 
 enum StatementType {
 	STMT_DIALOGUE,
@@ -73,7 +99,15 @@ enum DeclarationType {
 	DECL_SCENE
 };
 
-/* ── Expression ───────────────────────────────────────────────────── */
+/* ── Condition (COMPARADOR USADO EN IfStatement) ──────────────────────────────────── */
+
+struct Condition {
+	Expression * left;
+	ComparisonOp op;
+	Expression * right;
+};
+
+/* ── Expression (ARITMETICA/ID) ──────────────────────────────────── */
 
 struct Expression {
 	ExpressionType type;
@@ -88,25 +122,52 @@ struct Expression {
 	};
 };
 
-/* ── Condition ────────────────────────────────────────────────────── */
+/* ── Statements (ACCIONES) ─────────────────────────────────────────── */
 
-struct Condition {
-	Expression * left;
-	ComparisonOp op;
-	Expression * right;
+struct DialogueStatement {
+	char * actorId; 
+	char * text;
 };
 
-/* ── Statements ───────────────────────────────────────────────────── */
+struct ShowStatement {
+	char * resourceId;
+	ResourceDisplayType displayType; 
+};
 
-struct DialogueStatement { char * actorId; char * text; };
-struct ShowStatement     { ResourceDisplayType displayType; char * resourceId; };
-struct HideStatement     { ResourceDisplayType displayType; char * resourceId; };
-struct PlayStatement     { ResourceAudioType audioType;    char * resourceId; };
-struct StopStatement     { ResourceAudioType audioType;    char * resourceId; };
-struct GotoStatement     { char * sceneName; };
-struct SetStatement      { char * identifier; AssignOp op; Expression * expr; };
-struct ChoiceStatement   { ChoiceOption * options; };
-struct IfStatement       { Condition * condition; StatementList * thenBlock; StatementList * elseBlock; };
+struct HideStatement {
+	char * resourceId;
+	ResourceDisplayType displayType;
+};
+
+struct PlayStatement {
+	char * resourceId;
+	ResourceAudioType audioType;    
+};
+
+struct StopStatement {
+	char * resourceId;
+	ResourceAudioType audioType;
+};
+
+struct GotoStatement { 
+	char * sceneName;
+};
+
+struct SetStatement { 
+	char * identifier;
+	AssignOp op; 
+	Expression * expr; 
+};
+
+struct ChoiceStatement {
+	ChoiceOption * options;
+};
+
+struct IfStatement {
+	Condition * condition;
+	StatementList * thenBlock;
+	StatementList * elseBlock; 
+};
 
 struct Statement {
 	StatementType type;
@@ -124,19 +185,34 @@ struct Statement {
 	Statement * next;
 };
 
-struct StatementList { Statement * head; Statement * tail; };
+struct StatementList { 
+	Statement * head; 
+	Statement * tail; 
+};
 
 struct ChoiceOption {
-	char *         text;
+	char * text;
 	StatementList * body;
 	ChoiceOption * next;
 };
 
-/* ── Declarations ─────────────────────────────────────────────────── */
+/* ── Declarations (CONJUNTO ORGANZIADOR DE STATMENTS) ──────────────────── */
 
-struct CharacterDeclaration { char * displayName; char * identifier; char * color; };
-struct AssetDeclaration     { char * identifier;  char * filePath; };
-struct SceneDeclaration     { char * name;         StatementList * body; };
+struct CharacterDeclaration { 
+	char * displayName; 
+	char * identifier; 
+	char * color; 
+};
+
+struct AssetDeclaration { 
+	char * identifier;  
+	char * filePath; 
+};
+
+struct SceneDeclaration { 
+	char * name;        
+	StatementList * body; 
+};
 
 struct Declaration {
 	DeclarationType type;
@@ -149,46 +225,51 @@ struct Declaration {
 	Declaration * next;
 };
 
-struct DeclarationList { Declaration * head; Declaration * tail; };
+struct DeclarationList { 
+	Declaration * head; 
+	Declaration * tail; 
+};
 
-/* ── Program ──────────────────────────────────────────────────────── */
+/* ── Program (NODO DE MAYOR NIVEL) ───────────────────────────────────────── */
 
-struct Program { DeclarationList * declarations; };
+struct Program { 
+	DeclarationList * declarations;
+};
 
 /* ── Constructors ─────────────────────────────────────────────────── */
 
-Expression *         createIntegerExpression(int value);
-Expression *         createIdentifierExpression(char * identifier);
-Expression *         createBinaryExpression(Expression * left, ArithOp op, Expression * right);
+Expression * createIntegerExpression(int value);
+Expression * createIdentifierExpression(char * identifier);
+Expression * createBinaryExpression(Expression * left, ArithOp op, Expression * right);
 
-Condition *          createCondition(Expression * left, ComparisonOp op, Expression * right);
+Condition * createCondition(Expression * left, ComparisonOp op, Expression * right);
 
-StatementList *      createStatementList();
-void                 appendStatement(StatementList * list, Statement * stmt);
+StatementList * createStatementList();
+void appendStatement(StatementList * list, Statement * stmt);		// Agrega un statement al final de la lista
 
-Statement *          createDialogueStatement(char * actorId, char * text);
-Statement *          createShowStatement(ResourceDisplayType type, char * resourceId);
-Statement *          createHideStatement(ResourceDisplayType type, char * resourceId);
-Statement *          createPlayStatement(ResourceAudioType type, char * resourceId);
-Statement *          createStopStatement(ResourceAudioType type, char * resourceId);
-Statement *          createGotoStatement(char * sceneName);
-Statement *          createSetStatement(char * identifier, AssignOp op, Expression * expr);
-Statement *          createChoiceStatement(ChoiceOption * options);
-Statement *          createIfStatement(Condition * cond, StatementList * thenBlock, StatementList * elseBlock);
-Statement *          createEndStatement();
+Statement * createDialogueStatement(char * actorId, char * text);
+Statement * createShowStatement(ResourceDisplayType type, char * resourceId);
+Statement * createHideStatement(ResourceDisplayType type, char * resourceId);
+Statement * createPlayStatement(ResourceAudioType type, char * resourceId);
+Statement * createStopStatement(ResourceAudioType type, char * resourceId);
+Statement * createGotoStatement(char * sceneName);
+Statement * createSetStatement(char * identifier, AssignOp op, Expression * expr);
+Statement * createChoiceStatement(ChoiceOption * options);
+Statement * createIfStatement(Condition * cond, StatementList * thenBlock, StatementList * elseBlock);
+Statement * createEndStatement();
 
-ChoiceOption *       createChoiceOption(char * text, StatementList * body);
-void                 appendChoiceOption(ChoiceOption ** head, ChoiceOption * option);
+ChoiceOption * createChoiceOption(char * text, StatementList * body);
+void appendChoiceOption(ChoiceOption ** head, ChoiceOption * option);	// Agrega una opción al final de la lista
 
-DeclarationList *    createDeclarationList();
-void                 appendDeclaration(DeclarationList * list, Declaration * decl);
+DeclarationList * createDeclarationList();
+void appendDeclaration(DeclarationList * list, Declaration * decl);	// Agrega una declaración al final de la lista
 
-Declaration *        createCharacterDeclaration(char * displayName, char * identifier, char * color);
-Declaration *        createAssetDeclaration(char * identifier, char * filePath);
-Declaration *        createSetDeclaration(char * identifier, AssignOp op, Expression * expr);
-Declaration *        createSceneDeclaration(char * name, StatementList * body);
+Declaration * createCharacterDeclaration(char * displayName, char * identifier, char * color);
+Declaration * createAssetDeclaration(char * identifier, char * filePath);
+Declaration * createSetDeclaration(char * identifier, AssignOp op, Expression * expr);
+Declaration * createSceneDeclaration(char * name, StatementList * body);
 
-Program *            createProgram(DeclarationList * declarations);
+Program * createProgram(DeclarationList * declarations);
 
 /* ── Destructors ──────────────────────────────────────────────────── */
 
