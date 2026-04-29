@@ -20,7 +20,11 @@ ModuleDestructor initializeBisonActionsModule(CompilerState * compilerState) {
 	return _shutdownBisonActionsModule;
 }
 
-static void _log(const char * fn) { logDebugging(_logger, "%s", fn); }
+/* Helper function to logging facility */
+
+static void _log(const char * fn) { 
+	logDebugging(_logger, "%s", fn); 
+}
 
 /* ── Expressions ──────────────────────────────────────────────────── */
 
