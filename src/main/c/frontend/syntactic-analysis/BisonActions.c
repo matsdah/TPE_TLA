@@ -5,7 +5,6 @@
 static CompilerState * _compilerState = NULL;
 static Logger * _logger = NULL;
 
-/** Shutdown module's internal state. */
 void _shutdownBisonActionsModule() {
 	if (_logger != NULL) {
 		logDebugging(_logger, "Destroying module: BisonActions...");
@@ -21,65 +20,150 @@ ModuleDestructor initializeBisonActionsModule(CompilerState * compilerState) {
 	return _shutdownBisonActionsModule;
 }
 
-/* IMPORTED FUNCTIONS */
+static void _log(const char * fn) { logDebugging(_logger, "%s", fn); }
 
-/* PRIVATE FUNCTIONS */
+/* ── Expressions ──────────────────────────────────────────────────── */
 
-static void _logSyntacticAnalyzerAction(const char * functionName);
-
-/**
- * Logs a syntactic-analyzer action in DEBUGGING level.
- */
-static void _logSyntacticAnalyzerAction(const char * functionName) {
-	logDebugging(_logger, "%s", functionName);
+Expression * IntegerExpressionSemanticAction(int value) {
+	_log(__FUNCTION__);
+	return createIntegerExpression(value);
 }
 
-/* PUBLIC FUNCTIONS */
-
-Constant * IntegerConstantSemanticAction(const int value) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Constant * constant = calloc(1, sizeof(Constant));
-	constant->value = value;
-	return constant;
+Expression * IdentifierExpressionSemanticAction(char * identifier) {
+	_log(__FUNCTION__);
+	return createIdentifierExpression(identifier);
 }
 
-Expression * ArithmeticExpressionSemanticAction(Expression * leftExpression, Expression * rightExpression, ExpressionType type) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Expression * expression = calloc(1, sizeof(Expression));
-	expression->leftExpression = leftExpression;
-	expression->rightExpression = rightExpression;
-	expression->type = type;
-	return expression;
+Expression * BinaryExpressionSemanticAction(Expression * left, ArithOp op, Expression * right) {
+	_log(__FUNCTION__);
+	return createBinaryExpression(left, op, right);
 }
 
-Expression * FactorExpressionSemanticAction(Factor * factor) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Expression * expression = calloc(1, sizeof(Expression));
-	expression->factor = factor;
-	expression->type = FACTOR;
-	return expression;
+/* ── Condition ────────────────────────────────────────────────────── */
+
+Condition * ConditionSemanticAction(Expression * left, ComparisonOp op, Expression * right) {
+	_log(__FUNCTION__);
+	return createCondition(left, op, right);
 }
 
-Factor * ConstantFactorSemanticAction(Constant * constant) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Factor * factor = calloc(1, sizeof(Factor));
-	factor->constant = constant;
-	factor->type = CONSTANT;
-	return factor;
+/* ── Statements ───────────────────────────────────────────────────── */
+
+Statement * DialogueStatementSemanticAction(char * actorId, char * text) {
+	_log(__FUNCTION__);
+	return createDialogueStatement(actorId, text);
 }
 
-Factor * ExpressionFactorSemanticAction(Expression * expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Factor * factor = calloc(1, sizeof(Factor));
-	factor->expression = expression;
-	factor->type = EXPRESSION;
-	return factor;
+Statement * ShowStatementSemanticAction(ResourceDisplayType type, char * resourceId) {
+	_log(__FUNCTION__);
+	return createShowStatement(type, resourceId);
 }
 
-Program * ExpressionProgramSemanticAction(Expression * expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Program * program = calloc(1, sizeof(Program));
-	program->expression = expression;
+Statement * HideStatementSemanticAction(ResourceDisplayType type, char * resourceId) {
+	_log(__FUNCTION__);
+	return createHideStatement(type, resourceId);
+}
+
+Statement * PlayStatementSemanticAction(ResourceAudioType type, char * resourceId) {
+	_log(__FUNCTION__);
+	return createPlayStatement(type, resourceId);
+}
+
+Statement * StopStatementSemanticAction(ResourceAudioType type, char * resourceId) {
+	_log(__FUNCTION__);
+	return createStopStatement(type, resourceId);
+}
+
+Statement * GotoStatementSemanticAction(char * sceneName) {
+	_log(__FUNCTION__);
+	return createGotoStatement(sceneName);
+}
+
+Statement * SetStatementSemanticAction(char * identifier, AssignOp op, Expression * expr) {
+	_log(__FUNCTION__);
+	return createSetStatement(identifier, op, expr);
+}
+
+Statement * ChoiceStatementSemanticAction(ChoiceOption * options) {
+	_log(__FUNCTION__);
+	return createChoiceStatement(options);
+}
+
+Statement * IfStatementSemanticAction(Condition * cond, StatementList * thenBlock, StatementList * elseBlock) {
+	_log(__FUNCTION__);
+	return createIfStatement(cond, thenBlock, elseBlock);
+}
+
+Statement * EndStatementSemanticAction() {
+	_log(__FUNCTION__);
+	return createEndStatement();
+}
+
+/* ── StatementList ────────────────────────────────────────────────── */
+
+StatementList * EmptyStatementListSemanticAction() {
+	_log(__FUNCTION__);
+	return createStatementList();
+}
+
+StatementList * AppendStatementSemanticAction(StatementList * list, Statement * stmt) {
+	_log(__FUNCTION__);
+	appendStatement(list, stmt);
+	return list;
+}
+
+/* ── ChoiceOption ─────────────────────────────────────────────────── */
+
+ChoiceOption * ChoiceOptionSemanticAction(char * text, StatementList * body) {
+	_log(__FUNCTION__);
+	return createChoiceOption(text, body);
+}
+
+ChoiceOption * AppendChoiceOptionSemanticAction(ChoiceOption * list, ChoiceOption * option) {
+	_log(__FUNCTION__);
+	appendChoiceOption(&list, option);
+	return list;
+}
+
+/* ── Declarations ─────────────────────────────────────────────────── */
+
+Declaration * CharacterDeclarationSemanticAction(char * displayName, char * identifier, char * color) {
+	_log(__FUNCTION__);
+	return createCharacterDeclaration(displayName, identifier, color);
+}
+
+Declaration * AssetDeclarationSemanticAction(char * identifier, char * filePath) {
+	_log(__FUNCTION__);
+	return createAssetDeclaration(identifier, filePath);
+}
+
+Declaration * SetDeclarationSemanticAction(char * identifier, AssignOp op, Expression * expr) {
+	_log(__FUNCTION__);
+	return createSetDeclaration(identifier, op, expr);
+}
+
+Declaration * SceneDeclarationSemanticAction(char * name, StatementList * body) {
+	_log(__FUNCTION__);
+	return createSceneDeclaration(name, body);
+}
+
+/* ── DeclarationList ──────────────────────────────────────────────── */
+
+DeclarationList * EmptyDeclarationListSemanticAction() {
+	_log(__FUNCTION__);
+	return createDeclarationList();
+}
+
+DeclarationList * AppendDeclarationSemanticAction(DeclarationList * list, Declaration * decl) {
+	_log(__FUNCTION__);
+	appendDeclaration(list, decl);
+	return list;
+}
+
+/* ── Program ──────────────────────────────────────────────────────── */
+
+Program * ProgramSemanticAction(DeclarationList * declarations) {
+	_log(__FUNCTION__);
+	Program * program = createProgram(declarations);
 	_compilerState->abstractSyntaxtTree = program;
 	return program;
 }

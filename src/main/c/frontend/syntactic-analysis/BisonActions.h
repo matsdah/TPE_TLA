@@ -9,18 +9,47 @@
 #include "BisonParser.h"
 #include <stdlib.h>
 
-/** Initialize module's internal state. */
-ModuleDestructor initializeBisonActionsModule();
+ModuleDestructor initializeBisonActionsModule(CompilerState * compilerState);
 
-/**
- * Bison semantic actions.
- */
+/* ── Expressions ─────────────────────────────────────────────────── */
+Expression *      IntegerExpressionSemanticAction(int value);
+Expression *      IdentifierExpressionSemanticAction(char * identifier);
+Expression *      BinaryExpressionSemanticAction(Expression * left, ArithOp op, Expression * right);
 
-Constant * IntegerConstantSemanticAction(const int value);
-Expression * ArithmeticExpressionSemanticAction(Expression * leftExpression, Expression * rightExpression, ExpressionType type);
-Expression * FactorExpressionSemanticAction(Factor * factor);
-Factor * ConstantFactorSemanticAction(Constant * constant);
-Factor * ExpressionFactorSemanticAction(Expression * expression);
-Program * ExpressionProgramSemanticAction(Expression * expression);
+/* ── Condition ───────────────────────────────────────────────────── */
+Condition *       ConditionSemanticAction(Expression * left, ComparisonOp op, Expression * right);
+
+/* ── Statements ──────────────────────────────────────────────────── */
+Statement *       DialogueStatementSemanticAction(char * actorId, char * text);
+Statement *       ShowStatementSemanticAction(ResourceDisplayType type, char * resourceId);
+Statement *       HideStatementSemanticAction(ResourceDisplayType type, char * resourceId);
+Statement *       PlayStatementSemanticAction(ResourceAudioType type, char * resourceId);
+Statement *       StopStatementSemanticAction(ResourceAudioType type, char * resourceId);
+Statement *       GotoStatementSemanticAction(char * sceneName);
+Statement *       SetStatementSemanticAction(char * identifier, AssignOp op, Expression * expr);
+Statement *       ChoiceStatementSemanticAction(ChoiceOption * options);
+Statement *       IfStatementSemanticAction(Condition * cond, StatementList * thenBlock, StatementList * elseBlock);
+Statement *       EndStatementSemanticAction();
+
+/* ── StatementList ───────────────────────────────────────────────── */
+StatementList *   EmptyStatementListSemanticAction();
+StatementList *   AppendStatementSemanticAction(StatementList * list, Statement * stmt);
+
+/* ── ChoiceOption ────────────────────────────────────────────────── */
+ChoiceOption *    ChoiceOptionSemanticAction(char * text, StatementList * body);
+ChoiceOption *    AppendChoiceOptionSemanticAction(ChoiceOption * list, ChoiceOption * option);
+
+/* ── Declarations ────────────────────────────────────────────────── */
+Declaration *     CharacterDeclarationSemanticAction(char * displayName, char * identifier, char * color);
+Declaration *     AssetDeclarationSemanticAction(char * identifier, char * filePath);
+Declaration *     SetDeclarationSemanticAction(char * identifier, AssignOp op, Expression * expr);
+Declaration *     SceneDeclarationSemanticAction(char * name, StatementList * body);
+
+/* ── DeclarationList ─────────────────────────────────────────────── */
+DeclarationList * EmptyDeclarationListSemanticAction();
+DeclarationList * AppendDeclarationSemanticAction(DeclarationList * list, Declaration * decl);
+
+/* ── Program ─────────────────────────────────────────────────────── */
+Program *         ProgramSemanticAction(DeclarationList * declarations);
 
 #endif
