@@ -105,6 +105,38 @@ CompilationStatus IgnoredLexemeAction() {
 	return IN_PROGRESS;
 }
 
+CompilationStatus CreateCharacter(FlexContext context) {
+	if (_logIgnoredLexemes) {
+		Token * token = createToken(_lexicalAnalyzer, CHARACTER);
+		_logTokenAction(__FUNCTION__, token);
+		destroyToken(token);
+	}
+	enterLexicalAnalyzerContext(_lexicalAnalyzer, context);
+	return IN_PROGRESS;
+}
+
+CompilationStatus ExitCharacter_Context(){
+	pushInputBuffer(_inputBuffer);
+	leaveLexicalAnalyzerContext(_lexicalAnalyzer);
+	if (_logIgnoredLexemes) {
+		Token * token = createToken(_lexicalAnalyzer, SEMICOLON);
+		_logTokenAction(__FUNCTION__, token);
+		destroyToken(token);
+	}
+	return IN_PROGRESS;
+}
+
+CompilationStatus CreateID(){
+	Token * token = createToken(_lexicalAnalyzer, IDENTIFIER);
+	_inputBuffer = createInputBuffer(_lexicalAnalyzer, token->lexeme);
+	if (_logIgnoredLexemes) {
+		_logTokenAction(__FUNCTION__, token);
+	}
+	destroyToken(token);
+	return IN_PROGRESS;
+}
+
+
 CompilationStatus IntegerLexemeAction() {
 	Token * token = createToken(_lexicalAnalyzer, INTEGER);
 	token->semanticValue->integer = atoi(token->lexeme);

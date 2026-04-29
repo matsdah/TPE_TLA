@@ -35,6 +35,8 @@ extern CompilationStatus UnknownLexemeAction();
  */
 %x IMPORT_EXPRESSION
 %x MULTILINE_COMMENT
+%x CHARACTER_CONTEXT
+
 
 /**
  * Reusable patterns.
@@ -76,6 +78,11 @@ whitespace			[[:space:]]+
 
 {whitespace}						{ return IgnoredLexemeAction(); }
 .									{ return UnknownLexemeAction(); }
+
+"character"                                             { return CreateCharacter(CHARACTER_CONTEXT); }
+<CHARACTER_CONTEXT>[a-zA-Z][a-zA-Z0-9_-]*               { return CreateID();                }
+<CHARACTER_CONTEXT>";"                                  { return ExitCharacter_Context();   }
+
 
 <<EOF>>								{ return EOFLexemeAction(); }
 
