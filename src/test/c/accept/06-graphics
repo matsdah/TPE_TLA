@@ -1,0 +1,11 @@
+// Intercalado de visualización y ocultamiento de recursos gráficos (show, hide).
+
+asset bg_main = "assets/img/background.png";
+asset char_img = "assets/img/character.png";
+
+scene "Graphics_Test" {
+    show background bg_main;
+    show sprite char_img;
+    hide sprite char_img;
+    hide background bg_main;
+}

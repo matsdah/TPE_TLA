@@ -1,0 +1,13 @@
+// Operaciones aritméticas y acumulación sobre múltiples variables simultáneas.
+
+set points = 0;
+set multiplier = 2;
+set bonus = 5;
+
+scene "Arithmetic" {
+    set points += multiplier * bonus;
+    set points -= 3;
+    set multiplier += 1;
+    set bonus = points + multiplier;
+    set bonus = (points + multiplier) * 2;
+}

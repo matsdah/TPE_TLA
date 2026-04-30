@@ -1,0 +1,12 @@
+/* Acceso a todos los recursos de un archivo a otro */
+/* Los recursos y personajes se importan desde 11-cross-file-assets */
+
+{ src/test/c/accept/11-cross-file-assets }
+scene "start" {
+    show background bg_shared;
+    play music bgm_shared;
+    narrator "Resources loaded from another file."
+    stop music bgm_shared;
+    hide background bg_shared;
+    end;
+}

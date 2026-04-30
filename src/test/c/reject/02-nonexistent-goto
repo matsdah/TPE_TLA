@@ -1,0 +1,10 @@
+/* Salto incondicional (goto) hacia un identificador de escena inexistente */
+/* NOTA: rechazo semántico, puede ser falso positivo en Stage 2 */
+
+character "Alice" as alice color "#FF0000";
+
+scene "start" {
+    alice "Jumping to nowhere..."
+    goto "this_scene_does_not_exist";
+    end;
+}

@@ -1,0 +1,11 @@
+// Reproducción y detención de recursos de audio (play, stop).
+
+asset bgm_track = "assets/audio/music.ogg";
+asset sfx_effect = "assets/audio/effect.wav";
+
+scene "Audio_Test" {
+    play music bgm_track;
+    play sound sfx_effect;
+    stop sound sfx_effect;
+    stop music bgm_track;
+}

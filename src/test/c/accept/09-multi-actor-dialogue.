@@ -1,0 +1,14 @@
+// Intercambio de diálogos consecutivos entre múltiples actores declarados.
+
+character "Narrator" as narr color "#FFFFFF";
+character "Aria" as aria color "#FF5733";
+character "Leon" as leon color "#0077FF";
+
+scene "Conversation" {
+    narr "It was a stormy night."
+    aria "I don't like this place."
+    leon "Don't worry, I'm here."
+    aria "That doesn't help, Leon."
+    leon "Fair enough."
+    narr "The conversation ended awkwardly."
+}
