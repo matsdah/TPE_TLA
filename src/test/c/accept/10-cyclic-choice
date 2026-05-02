@@ -1,0 +1,20 @@
+// Escena con ramificación interactiva cíclica.
+
+character "Guide" as guide color "#00FF00";
+
+set loops = 0;
+
+scene "Loop_Scene" {
+    guide "Do you want to continue?"
+    set loops += 1;
+    choice {
+        "Yes, continue" {
+            guide "Let's keep going!"
+            goto "Loop_Scene";
+        }
+        "No, stop" {
+            guide "Goodbye!"
+            end;
+        }
+    }
+}

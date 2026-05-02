@@ -1,0 +1,20 @@
+// Evaluación de estructuras condicionales anidadas (if/else dentro de if/else).
+
+set x = 10;
+set y = 5;
+
+scene "Nested_If" {
+    if (x > 0) {
+        if (y > 0) {
+            goto "Both_Positive";
+        } else {
+            goto "X_Only";
+        }
+    } else {
+        goto "Neither";
+    }
+}
+
+scene "Both_Positive" { end; }
+scene "X_Only"        { end; }
+scene "Neither"       { end; }

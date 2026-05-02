@@ -1,0 +1,7 @@
+/* Uso de palabra reservada como identificador de actor */
+/* 'scene' es una keyword → el lexer no la tokeniza como IDENTIFIER → rechazo sintáctico */
+character "Alice" as scene color "#FF0000";
+
+scene "start" {
+    end;
+}

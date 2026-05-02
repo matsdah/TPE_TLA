@@ -1,0 +1,10 @@
+/* Incompatibilidad de tipos: se asigna un string a una variable entera */
+/* STRING no es válido en una expresión aritmética → rechazo sintáctico */
+set score = 0;
+
+character "Alice" as alice color "#FF0000";
+
+scene "start" {
+    set score = "this is not a number";
+    end;
+}
