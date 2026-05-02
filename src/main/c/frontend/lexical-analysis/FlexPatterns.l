@@ -25,6 +25,9 @@ extern CompilationStatus LeaveMultilineCommentLexemeAction();
 extern CompilationStatus ParenthesisLexemeAction(TokenLabel label);
 extern CompilationStatus SubexpressionLexemeAction();
 extern CompilationStatus UnknownLexemeAction();
+extern CompilationStatus CreateID();
+extern CompilationStatus CreateCharacter();
+extern CompilationStatus ExitCharacter_Context();
 
 %}
 
@@ -79,9 +82,12 @@ whitespace			[[:space:]]+
 {whitespace}						{ return IgnoredLexemeAction(); }
 .									{ return UnknownLexemeAction(); }
 
+
+
 "character"                                             { return CreateCharacter(CHARACTER_CONTEXT); }
 <CHARACTER_CONTEXT>[a-zA-Z][a-zA-Z0-9_-]*               { return CreateID();                }
 <CHARACTER_CONTEXT>";"                                  { return ExitCharacter_Context();   }
+<CHARACTER_CONTEXT>.									{ return UnknownLexemeAction(); }
 
 
 <<EOF>>								{ return EOFLexemeAction(); }
