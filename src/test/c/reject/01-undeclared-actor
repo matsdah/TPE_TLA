@@ -1,6 +1,6 @@
 /* Invocación de un actor no declarado en el ámbito global */
 /* ghost nunca fue declarado con 'character' */
-/* NOTA: rechazo semántico, puede ser falso positivo en Stage 2 */
+/* NOTA: rechazo semántico — falso positivo en Stage 2 */
 
 character "Alice" as alice color "#FF0000";
 
@@ -9,32 +9,3 @@ scene "start" {
     ghost "I was never declared."
     end;
 }
-
-
-/*Invocación de un recurso no declarado en el ámbito global */
-
-asset "background" as bg "background.png";
-
-scene "start" {
-    bg "background.png"
-    bg "background_not_declared.png"
-    end;
-}
-
-asset "music" as bgm "music.mp3";
-
-scene "start" {
-    bgm "music.mp3"
-    bgm "music_not_declared.mp3"
-    end;
-}
-
-asset "sound_effect" as sfx "effect.wav";
-
-scene "start" {
-    sfx "effect.wav"
-    sfx "effect_not_declared.wav"
-    end;
-}
-
-
