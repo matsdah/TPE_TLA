@@ -140,7 +140,7 @@ void yyerror(const YYLTYPE * location, const char * message) {}
 program: declarationList			{ $$ = ProgramSemanticAction($1); }
 	;
 
-declarationList: %empty				{ $$ = EmptyDeclarationListSemanticAction(); }
+declarationList: %empty			{ $$ = EmptyDeclarationListSemanticAction(); }
 	| declarationList declaration	{ $$ = AppendDeclarationSemanticAction($1, $2); }
 	;
 
@@ -168,7 +168,7 @@ statement: dialogueStatement	{ $$ = $1; }
 	| endStatement				{ $$ = $1; }
 	;
 
-dialogueStatement: IDENTIFIER STRING			{ $$ = DialogueStatementSemanticAction($1, $2); free($1); free($2); }
+dialogueStatement: IDENTIFIER STRING SEMICOLON			{ $$ = DialogueStatementSemanticAction($1, $2); free($1); free($2); }
 	;
 
 showStatement: SHOW BACKGROUND IDENTIFIER SEMICOLON		{ $$ = ShowStatementSemanticAction(DISPLAY_BACKGROUND, $3); free($3); }

@@ -9,7 +9,7 @@ asset bgm_theme = "assets/audio/theme.ogg";
 scene "Intro" {
     show background bg_forest;
     play music bgm_theme;
-    narr "The wind blew cold through the ancient trees."
-    aria "We shouldn't be here..."
-    narr "Suddenly, a branch snapped behind them."
+    narr "The wind blew cold through the ancient trees.";
+    aria "We shouldn't be here...";
+    narr "Suddenly, a branch snapped behind them.";
 }

@@ -5,7 +5,7 @@
 character "Alice" as alice color "#FF0000";
 
 scene "start" {
-    alice "I am declared."
-    ghost "I was never declared."
+    alice "I am declared.";
+    ghost "I was never declared." 
     end;
 }

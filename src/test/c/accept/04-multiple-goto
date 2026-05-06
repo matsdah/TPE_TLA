@@ -3,21 +3,21 @@
 character "Narr" as narr color "#FFFFFF";
 
 scene "Scene_A" {
-    narr "Scene A."
+    narr "Scene A.";
     goto "Scene_B";
 }
 
 scene "Scene_B" {
-    narr "Scene B."
+    narr "Scene B.";
     goto "Scene_C";
 }
 
 scene "Scene_C" {
-    narr "Scene C."
+    narr "Scene C.";
     goto "Scene_D";
 }
 
 scene "Scene_D" {
-    narr "Final scene."
+    narr "Final scene.";
     end;
 }

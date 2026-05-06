@@ -4,8 +4,8 @@ load "src/test/c/accept/11-cross-file-assets";
 scene "Shared_Resources" {
     show background bg_shared;
     play music bgm_shared;
-    narr "Resources loaded from another file."
-    aria "It works!"
+    narr "Resources loaded from another file.";
+    aria "It works!";
     stop music bgm_shared;
     hide background bg_shared;
     end;

@@ -3,25 +3,25 @@
 character "Aria" as aria color "#FF5733";
 
 scene "Choice_Scene" {
-    aria "Which path do we take?"
+    aria "Which path do we take?";
     choice {
         "Take the bright path" {
-            aria "A wise choice."
+            aria "A wise choice.";
             goto "Safe_Path";
         }
         "Enter the darkness" {
-            aria "Are you crazy?"
+            aria "Are you crazy?";
             goto "Dark_Cave";
         }
     }
 }
 
 scene "Safe_Path" {
-    aria "We made it safely."
+    aria "We made it safely.";
     end;
 }
 
 scene "Dark_Cave" {
-    aria "It's very dark here."
+    aria "It's very dark here.";
     end;
 }

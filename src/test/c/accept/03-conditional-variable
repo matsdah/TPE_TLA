@@ -5,23 +5,23 @@ character "Aria" as aria color "#FF5733";
 set affinity = 5;
 
 scene "Decision" {
-    aria "How do you feel about this?"
+    aria "How do you feel about this?";
     set affinity += 2;
     if (affinity > 5) {
-        aria "You seem happy!"
+        aria "You seem happy!";
         goto "Good_End";
     } else {
-        aria "You seem sad..."
+        aria "You seem sad...";
         goto "Bad_End";
     }
 }
 
 scene "Good_End" {
-    aria "Great ending!"
+    aria "Great ending!";
     end;
 }
 
 scene "Bad_End" {
-    aria "Sad ending..."
+    aria "Sad ending...";
     end;
 }

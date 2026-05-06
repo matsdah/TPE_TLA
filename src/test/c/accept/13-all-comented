@@ -1,0 +1,17 @@
+/*This is just a MULTILINE_COMMENT
+
+"Narrator" as narr color "#FFFFFF";
+character "Aria" as aria color "#FF5733";
+
+asset bg_forest = "assets/img/forest.png";
+asset bgm_theme = "assets/audio/theme.ogg";
+
+scene "Intro" {
+    show background bg_forest;
+    play music bgm_theme;
+    narr "The wind blew cold through the ancient trees.";
+    aria "We shouldn't be here...";
+    narr "Suddenly, a branch snapped behind them.";
+}
+
+*/

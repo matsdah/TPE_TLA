@@ -6,7 +6,7 @@ character "Narr" as narr color "#FFFFFF";
 
 scene "Comment_Test" {
     // Comment inside scene
-    narr "Testing comments."
+    narr "Testing comments.";
     /* Another multiline
        comment inside scene */
     end;

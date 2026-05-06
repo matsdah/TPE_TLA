@@ -1,0 +1,7 @@
+/* Intento iniciar un character de forma equivocada o incompleta */
+/* */
+character "Alice" as alice color "#FF0000";
+
+scene "start" {
+    end;
+}
