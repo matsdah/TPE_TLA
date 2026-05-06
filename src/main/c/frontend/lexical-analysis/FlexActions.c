@@ -66,19 +66,20 @@ CompilationStatus OperatorLexemeAction(TokenLabel label) {
 CompilationStatus PunctuationLexemeAction(TokenLabel label) {
 	Token * token = createToken(_lexicalAnalyzer, label);
 	_logTokenAction(__FUNCTION__, token);
+	CompilationStatus status = pushToken(_lexicalAnalyzer, token);
 	destroyToken(token);
-	return FAILED;
+	return status;
 }
 
 CompilationStatus pushTokenLabel(TokenLabel label) {
-
-	if(_logIgnoredLexemes){
-		Token * token = createToken(_lexicalAnalyzer, label);
+	Token * token = createToken(_lexicalAnalyzer, label);
+	if (_logIgnoredLexemes) {
 		_logTokenAction(__FUNCTION__, token);
-		CompilationStatus status = pushToken(_lexicalAnalyzer, token);
-		destroyToken(token);		
-		return status;
 	}
+	CompilationStatus status = pushToken(_lexicalAnalyzer, token);
+	destroyToken(token);
+	return status;
+}
 
 CompilationStatus IntegerLexemeAction() {
 	Token * token = createToken(_lexicalAnalyzer, INTEGER);
@@ -119,7 +120,6 @@ CompilationStatus IgnoredLexemeAction() {
 		Token * token = createToken(_lexicalAnalyzer, IGNORED);
 		_logTokenAction(__FUNCTION__, token);
 		destroyToken(token);
-		enterLexicalAnalyzerContext(_lexicalAnalyzer, context);
 	}
 	return IN_PROGRESS;
 }
