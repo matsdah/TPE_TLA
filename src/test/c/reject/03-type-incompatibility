@@ -6,6 +6,6 @@ character "Narrator" as narr color "#FFFFFF";
 set score = narr + 1;
 
 scene "start" {
-    narr "Using a character ID as a number."
+    narr "Using a character ID as a number.";
     end;
 }
