@@ -1,10 +1,11 @@
-/* Incompatibilidad de tipos: se asigna un string a una variable entera */
-/* STRING no es válido en una expresión aritmética → rechazo sintáctico */
-set score = 0;
+/* Incompatibilidad de tipos: identificador de actor usado como variable numérica */
+/* Sintácticamente válido (IDENTIFIER en expression) — falso positivo en Stage 2 */
 
-character "Alice" as alice color "#FF0000";
+character "Narrator" as narr color "#FFFFFF";
+
+set score = narr + 1;
 
 scene "start" {
-    set score = "this is not a number";
+    narr "Using a character ID as a number."
     end;
 }
