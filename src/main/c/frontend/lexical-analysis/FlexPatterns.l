@@ -14,20 +14,11 @@
  * @see https://westes.github.io/flex/manual/Definitions-Section.html#Definitions-Section
  */
 
-extern CompilationStatus ArithmeticOperatorLexemeAction(TokenLabel label);
-extern CompilationStatus EnterImportExpressionLexemeAction(FlexContext context);
-extern CompilationStatus EnterMultilineCommentLexemeAction(FlexContext context);
-extern CompilationStatus EOFLexemeAction();
-extern CompilationStatus IgnoredLexemeAction();
-extern CompilationStatus IntegerLexemeAction();
-extern CompilationStatus LeaveImportExpressionLexemeAction();
-extern CompilationStatus LeaveMultilineCommentLexemeAction();
-extern CompilationStatus ParenthesisLexemeAction(TokenLabel label);
-extern CompilationStatus SubexpressionLexemeAction();
 extern CompilationStatus UnknownLexemeAction();
-extern CompilationStatus CreateID();
-extern CompilationStatus CreateCharacter();
-extern CompilationStatus ExitCharacter_Context();
+extern CompilationStatus pushTokenLabel(TokenLabel label);
+extern CompilationStatus pushTokenLabelAndEnterContext(TokenLabel label, FlexContext context);
+extern CompilationStatus pushTokenLabelAndExitContext(TokenLabel label);
+extern CompilationStatus EOFLexemeAction();
 
 %}
 
@@ -38,7 +29,7 @@ extern CompilationStatus ExitCharacter_Context();
  */
 %x IMPORT_EXPRESSION
 %x MULTILINE_COMMENT
-%x CHARACTER_CONTEXT
+%x VARIABLE_DEF_CONTEXT
 
 
 /**
@@ -59,15 +50,15 @@ whitespace			[[:space:]]+
 
 %}
 
-"{"									{ return EnterImportExpressionLexemeAction(IMPORT_EXPRESSION); }
+"{"									{ return pushTokenLabelAndEnterContext(OPEN_BRACE, IMPORT_EXPRESSION) }
 <IMPORT_EXPRESSION>[^{}]+			{ return SubexpressionLexemeAction(); }
-<IMPORT_EXPRESSION>"}"				{ return LeaveImportExpressionLexemeAction(); }
+<IMPORT_EXPRESSION>"}"				{ return pushTokenLabelAndExitContext(CLOSE_BRACE); }
 <IMPORT_EXPRESSION>.				{ return UnknownLexemeAction(); }
 
-"/*"								{ return EnterMultilineCommentLexemeAction(MULTILINE_COMMENT); }
-<MULTILINE_COMMENT>"*/"				{ return LeaveMultilineCommentLexemeAction(); }
-<MULTILINE_COMMENT>[^*]+			{ return IgnoredLexemeAction(); }
-<MULTILINE_COMMENT>.				{ return IgnoredLexemeAction(); }
+"/*"								{ return pushTokenLabelAndEnterContext(OPEN_COMMENT, MULTILINE_COMMENT); }
+<MULTILINE_COMMENT>"*/"				{ return pushTokenLabelAndExitContext(CLOSE_COMMENT); }
+<MULTILINE_COMMENT>[^*]+			{ return pushTokenLabel(IGNORED); }
+<MULTILINE_COMMENT>.				{ return pushTokenLabel(IGNORED); }
 
 "-"									{ return ArithmeticOperatorLexemeAction(SUB); }
 "*"									{ return ArithmeticOperatorLexemeAction(MUL); }
@@ -84,10 +75,14 @@ whitespace			[[:space:]]+
 
 
 
-"character"                                             { return CreateCharacter(CHARACTER_CONTEXT); }
-<CHARACTER_CONTEXT>[a-zA-Z][a-zA-Z0-9_-]*               { return CreateID();                }
+
+"character"                                             { return CreateVar(VARIABLE_DEF_CONTEXT, CHARACTER ); }
+"as"                                                    { return AS}
+<CHARACTER_CONTEXT>[a-zA-Z][a-zA-Z0-9_]*                { return CreateID();                }
 <CHARACTER_CONTEXT>";"                                  { return ExitCharacter_Context();   }
-<CHARACTER_CONTEXT>.									{ return UnknownLexemeAction(); }
+
+
+
 
 
 <<EOF>>								{ return EOFLexemeAction(); }
