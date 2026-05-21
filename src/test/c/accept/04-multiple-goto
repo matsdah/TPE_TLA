@@ -1,6 +1,6 @@
 // Múltiples saltos incondicionales (goto) entre diferentes escenas.
 
-character "Narr" as narr color "#FFFFFF";
+character "Narr" as narr color #FFFFFF;
 
 scene "Scene_A" {
     narr "Scene A.";

@@ -2,7 +2,7 @@
 /* ghost nunca fue declarado con 'character' */
 /* NOTA: rechazo semántico — falso positivo en Stage 2 */
 
-character "Alice" as alice color "#FF0000";
+character "Alice" as alice color #FF0000;
 
 scene "start" {
     alice "I am declared.";

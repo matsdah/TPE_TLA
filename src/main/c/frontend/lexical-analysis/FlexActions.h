@@ -10,6 +10,7 @@
 #include "../../support/type/ModuleDestructor.h"
 #include "../../support/type/Token.h"
 #include "../../support/type/TokenLabel.h"
+#include "../syntactic-analysis/BisonParser.h"
 #include "../Frontend.h"
 
 ModuleDestructor initializeFlexActionsModule(LexicalAnalyzer * lexicalAnalyzer);
@@ -20,6 +21,7 @@ CompilationStatus OperatorLexemeAction(TokenLabel label);
 CompilationStatus PunctuationLexemeAction(TokenLabel label);
 CompilationStatus IntegerLexemeAction();
 CompilationStatus StringLexemeAction();
+CompilationStatus ColorLexemeAction();
 CompilationStatus IdentifierLexemeAction();
 CompilationStatus IgnoredLexemeAction();
 CompilationStatus UnknownLexemeAction();

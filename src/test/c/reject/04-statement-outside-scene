@@ -1,7 +1,7 @@
 /* Sentencia ejecutable fuera del bloque de una escena */
 /* Los diálogos solo son válidos dentro de scene { } → rechazo sintáctico */
 
-character "Alice" as alice color "#FF0000";
+character "Alice" as alice color #FF0000;
 
 alice "This dialogue is outside any scene.";
 

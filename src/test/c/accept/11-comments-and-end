@@ -2,7 +2,7 @@
 /* Multi-line
    comment at global scope */
 
-character "Narr" as narr color "#FFFFFF";
+character "Narr" as narr color #FFFFFF;
 
 scene "Comment_Test" {
     // Comment inside scene

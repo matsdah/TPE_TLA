@@ -105,6 +105,17 @@ CompilationStatus StringLexemeAction() {
 	return status;
 }
 
+CompilationStatus ColorLexemeAction() {
+	Token * token = createToken(_lexicalAnalyzer, COLOR_LITERAL);
+	int literal_len = token->length;
+	token->semanticValue->string = (char *) calloc(literal_len + 1, sizeof(char));
+	strncpy(token->semanticValue->string, token->lexeme, literal_len);
+	_logTokenAction(__FUNCTION__, token);
+	CompilationStatus status = pushToken(_lexicalAnalyzer, token);
+	destroyToken(token);
+	return status;
+}
+
 CompilationStatus IdentifierLexemeAction() {
 	Token * token = createToken(_lexicalAnalyzer, IDENTIFIER);
 	token->semanticValue->string = (char *) calloc(token->length + 1, sizeof(char));

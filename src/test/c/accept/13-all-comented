@@ -1,7 +1,7 @@
 /*This is just a MULTILINE_COMMENT
 
-"Narrator" as narr color "#FFFFFF";
-character "Aria" as aria color "#FF5733";
+"Narrator" as narr color #FFFFFF;
+character "Aria" as aria color #FF5733;
 
 asset bg_forest = "assets/img/forest.png";
 asset bgm_theme = "assets/audio/theme.ogg";

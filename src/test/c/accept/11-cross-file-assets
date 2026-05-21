@@ -1,6 +1,6 @@
 // Archivo auxiliar — recursos compartidos cargados por 12-cross-file-access
-character "Narrator" as narr color "#FFFFFF";
-character "Aria" as aria color "#FF5733";
+character "Narrator" as narr color #FFFFFF;
+character "Aria" as aria color #FF5733;
 
 asset bg_shared = "assets/img/shared_bg.png";
 asset bgm_shared = "assets/audio/shared_music.ogg";

@@ -1,7 +1,7 @@
 /* Incompatibilidad de tipos: identificador de actor usado como variable numérica */
 /* Sintácticamente válido (IDENTIFIER en expression) — falso positivo en Stage 2 */
 
-character "Narrator" as narr color "#FFFFFF";
+character "Narrator" as narr color #FFFFFF;
 
 set score = narr + 1;
 

@@ -40,5 +40,18 @@ for test in $(ls src/test/c/reject/); do
 done
 echo ""
 
+echo "JSON output should exist..."
+echo ""
+
+JSON_TEST_FILE="src/test/c/accept/01-linear-scene"
+cat "$JSON_TEST_FILE" | ".build/Flex-Bison-Compiler" "$JSON_TEST_FILE" >/dev/null 2>&1
+if [ -s ".build/story.json" ]; then
+	echo -e "    story.json, ${GREEN}generated${OFF}"
+else
+	STATUS=1
+	echo -e "    story.json, ${RED}missing${OFF}"
+fi
+echo ""
+
 echo "All done."
 exit $STATUS

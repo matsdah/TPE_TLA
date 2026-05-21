@@ -19,6 +19,7 @@ extern CompilationStatus OperatorLexemeAction(TokenLabel label);
 extern CompilationStatus PunctuationLexemeAction(TokenLabel label);
 extern CompilationStatus IntegerLexemeAction();
 extern CompilationStatus StringLexemeAction();
+extern CompilationStatus ColorLexemeAction();
 extern CompilationStatus IdentifierLexemeAction();
 extern CompilationStatus IgnoredLexemeAction();
 extern CompilationStatus UnknownLexemeAction();
@@ -49,6 +50,7 @@ whitespace      [[:space:]]+
 digit           [[:digit:]]
 letter          [[:alpha:]_]
 alphanumeric    [[:alnum:]_]
+hex             [0-9A-Fa-f]
 
 %%
 
@@ -94,6 +96,8 @@ alphanumeric    [[:alnum:]_]
 "end"                       { return KeywordLexemeAction(END); }
 
 {letter}{alphanumeric}*     { return IdentifierLexemeAction(); }
+
+#{hex}{6}                   { return ColorLexemeAction(); }
 
 \"[^\"]*\"                  { return StringLexemeAction(); }
 

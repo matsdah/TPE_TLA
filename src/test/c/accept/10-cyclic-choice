@@ -1,6 +1,6 @@
 // Escena con ramificación interactiva cíclica.
 
-character "Guide" as guide color "#00FF00";
+character "Guide" as guide color #00FF00;
 
 set loops = 0;
 

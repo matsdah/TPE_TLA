@@ -50,6 +50,7 @@ void yyerror(const YYLTYPE * location, const char * message) {}
 /** Terminals — literals. */
 %token <integer> INTEGER
 %token <string>  STRING
+%token <string>  COLOR_LITERAL
 %token <string>  IDENTIFIER
 
 /** Terminals — keywords. */
@@ -144,7 +145,7 @@ declarationList: %empty			{ $$ = EmptyDeclarationListSemanticAction(); }
 	| declarationList declaration	{ $$ = AppendDeclarationSemanticAction($1, $2); }
 	;
 
-declaration: CHARACTER STRING AS IDENTIFIER COLOR STRING SEMICOLON	{ $$ = CharacterDeclarationSemanticAction($2, $4, $6); free($2); free($4); free($6); }
+declaration: CHARACTER STRING AS IDENTIFIER COLOR COLOR_LITERAL SEMICOLON	{ $$ = CharacterDeclarationSemanticAction($2, $4, $6); free($2); free($4); free($6); }
 	| ASSET IDENTIFIER ASSIGN STRING SEMICOLON						{ $$ = AssetDeclarationSemanticAction($2, $4); free($2); free($4); }
 	| SET IDENTIFIER ASSIGN expression SEMICOLON					{ $$ = SetDeclarationSemanticAction($2, ASSIGN_OP, $4); free($2); }
 	| SET IDENTIFIER ASSIGN_ADD expression SEMICOLON 				{ $$ = SetDeclarationSemanticAction($2, ASSIGN_ADD_OP, $4); free($2); }

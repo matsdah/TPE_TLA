@@ -2,6 +2,7 @@
 #include "frontend/lexical-analysis/FlexActions.h"
 #include "frontend/syntactic-analysis/AbstractSyntaxTree.h"
 #include "frontend/syntactic-analysis/BisonActions.h"
+#include "backend/code-generation/Generator.h"
 #include "support/logging/Logger.h"
 #include "support/type/CompilationStatus.h"
 #include "support/type/CompilerState.h"
@@ -19,18 +20,26 @@ const int main(const int length, const char ** arguments) {
 		logDebugging(logger, "Argument %d: \"%s\"", k, arguments[k]);
 	}
 	CompilerState compilerState = {
-		.abstractSyntaxtTree = NULL
+		.abstractSyntaxtTree = NULL,
+		.sourcePath = NULL
 	};
+	if (1 < length) {
+		compilerState.sourcePath = arguments[1];
+	}
 	ModuleDestructor moduleDestructors[] = {
 		initializeAbstractSyntaxTreeModule(),
 		initializeFlexActionsModule(lexicalAnalyzer),
 		initializeBisonActionsModule(&compilerState),
-		initializeFrontendModule(lexicalAnalyzer)
+		initializeFrontendModule(lexicalAnalyzer),
+		initializeGeneratorModule()
 	};
 	CompilationStatus compilationStatus = executeSyntacticAnalysis();
 	if (compilationStatus != SUCCEEDED) {
 		logError(logger, "The syntactic-analysis phase rejects the input program.");
 		compilationStatus = FAILED;
+	}
+	else {
+		executeGenerator(&compilerState);
 	}
 	logDebugging(logger, "Releasing AST resources...");
 	destroyProgram(compilerState.abstractSyntaxtTree);
