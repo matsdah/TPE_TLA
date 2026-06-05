@@ -1,22 +1,122 @@
 #include <raylib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <libgen.h>
+#include "runtime/StoryLoader.h"
+#include "runtime/Engine.h"
+
+static void _drawWrappedText(const char * text, int x, int y, int fontSize, int maxWidth, Color color) {
+	/* Naive word-wrap for Raylib's DrawText */
+	if (text == NULL) return;
+	const char * word = text;
+	int cursorX = x;
+	int cursorY = y;
+	while (*word != '\0') {
+		const char * end = word;
+		while (*end != '\0' && *end != ' ') end++;
+		int len = (int)(end - word);
+		int wordWidth = MeasureText(word, fontSize);
+		if (cursorX + wordWidth > x + maxWidth && cursorX != x) {
+			cursorX = x;
+			cursorY += fontSize + 4;
+		}
+		DrawText(word, cursorX, cursorY, fontSize, color);
+		cursorX += wordWidth + MeasureText(" ", fontSize);
+		if (*end == ' ') end++;
+		word = end;
+	}
+}
 
 const int main(const int length, const char ** arguments) {
-	printf("Flex-Bison-Player placeholder starting...\n");
+	if (length < 2) {
+		printf("Usage: Flex-Bison-Player <story.json>\n");
+		return 1;
+	}
+
+	const char * jsonPath = arguments[1];
+	Story * story = StoryLoader_load(jsonPath);
+	if (story == NULL) {
+		fprintf(stderr, "Failed to load story from %s\n", jsonPath);
+		return 1;
+	}
+
+	/* Resolve asset paths relative to story.json directory */
+	char * pathCopy = (char *) malloc(strlen(jsonPath) + 1);
+	strcpy(pathCopy, jsonPath);
+	char * dir = dirname(pathCopy);
+	StoryLoader_resolveAssetPaths(story, dir);
+	free(pathCopy);
+
+	Engine * engine = Engine_create(story);
+	if (engine == NULL) {
+		StoryLoader_destroy(story);
+		return 1;
+	}
 
 	const int screenWidth = 800;
 	const int screenHeight = 600;
 	InitWindow(screenWidth, screenHeight, "Flex-Bison-Player");
 	SetTargetFPS(60);
 
-	while (!WindowShouldClose()) {
+	while (!WindowShouldClose() && !Engine_isFinished(engine)) {
+		Engine_update(engine);
+
+		/* Input handling */
+		if (IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+			if (Engine_isWaitingForInput(engine) && Engine_getChoiceCount(engine) == 0) {
+				Engine_advance(engine);
+			}
+		}
+
+		/* Choice selection via keyboard numbers */
+		if (Engine_isWaitingForInput(engine) && Engine_getChoiceCount(engine) > 0) {
+			for (int i = 0; i < Engine_getChoiceCount(engine) && i < 9; i++) {
+				if (IsKeyPressed(KEY_ONE + i)) {
+					Engine_selectChoice(engine, i);
+					break;
+				}
+			}
+		}
+
 		BeginDrawing();
-		ClearBackground(RAYWHITE);
-		DrawText("Flex-Bison-Player placeholder", 190, 200, 20, LIGHTGRAY);
+		ClearBackground(BLACK);
+
+		/* Background placeholder (Phase 3 will load actual textures) */
+		if (Engine_getCurrentScene(engine) != NULL) {
+			DrawRectangle(0, 0, screenWidth, screenHeight, DARKGRAY);
+		}
+
+		/* Dialogue box */
+		const char * actor = Engine_getCurrentDialogueActor(engine);
+		const char * dialogue = Engine_getCurrentDialogueText(engine);
+		if (dialogue != NULL) {
+			int boxY = screenHeight - 180;
+			DrawRectangle(20, boxY, screenWidth - 40, 160, (Color){0, 0, 0, 200});
+			if (actor != NULL) {
+				DrawText(actor, 40, boxY + 10, 24, YELLOW);
+			}
+			_drawWrappedText(dialogue, 40, boxY + 45, 20, screenWidth - 80, WHITE);
+			DrawText("[SPACE / Click to continue]", 40, boxY + 140, 16, LIGHTGRAY);
+		}
+
+		/* Choice menu */
+		int choiceCount = Engine_getChoiceCount(engine);
+		if (choiceCount > 0) {
+			int boxY = screenHeight - 40 - choiceCount * 40;
+			for (int i = 0; i < choiceCount; i++) {
+				const char * text = Engine_getChoiceText(engine, i);
+				if (text == NULL) continue;
+				DrawRectangle(60, boxY + i * 40, screenWidth - 120, 32, DARKBLUE);
+				DrawText(TextFormat("%d. %s", i + 1, text), 70, boxY + i * 40 + 6, 20, WHITE);
+			}
+		}
+
 		EndDrawing();
 	}
 
 	CloseWindow();
-	printf("Flex-Bison-Player placeholder exiting.\n");
+	Engine_destroy(engine);
+	StoryLoader_destroy(story);
 	return 0;
 }

@@ -63,6 +63,10 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	# Defines the visual-novel player entry-point and its source files.
 	add_executable(Flex-Bison-Player
 		src/main/c/player/PlayerEntryPoint.c
+		src/main/c/player/vendor/cJSON.c
+		src/main/c/player/runtime/StoryLoader.c
+		src/main/c/player/runtime/ExpressionEvaluator.c
+		src/main/c/player/runtime/Engine.c
 	)
 	target_link_libraries(Flex-Bison-Player raylib m)
 else ()

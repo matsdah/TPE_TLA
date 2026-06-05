@@ -8,6 +8,11 @@ C compiler for a visual-novel / story DSL, built with **Flex + Bison + CMake + G
 
 - **Compiler entry point:** `src/main/c/EntryPoint.c`
 - **Player entry point:** `src/main/c/player/PlayerEntryPoint.c`
+- **Player runtime modules:**
+  - `src/main/c/player/runtime/StoryLoader.c` — parses `.build/story.json` into an in-memory runtime model (`Story`, `Scene`, `Statement`, etc.).
+  - `src/main/c/player/runtime/ExpressionEvaluator.c` — evaluates integer expressions and conditions against the runtime variable table.
+  - `src/main/c/player/runtime/Engine.c` — drives the story via a context-stack state machine; handles `dialogue`, `choice`, `if/else`, `goto`, `set`, and all media commands.
+  - `src/main/c/player/vendor/cJSON.c` — vendored MIT-licensed JSON parser (no external dependency).
 - **Generated code:** `FlexScanner.c/h` (from `FlexPatterns.l`) and `BisonParser.c/h` (from `BisonGrammar.y`) live under `src/main/c/frontend/` but are `.gitignore`d. Do not edit them by hand.
 
 ## Build
