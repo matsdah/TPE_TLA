@@ -78,7 +78,7 @@ docker compose down
 
 ## Gotchas
 
-- `.gitignore` ignores `*.md` — new Markdown files will not show up in `git status` unless you `git add -f` them.
 - The scanner supports a `load "filename" ;` directive (see `FlexPatterns.l` start condition `LOAD_FILE`). This loads external story files; keep it in mind when testing cross-file features.
 - `BisonGrammar.y` uses `%define api.push-pull push`, `%define api.pure full`, and `%destructor` rules for every allocated semantic value. Do not change those directives without understanding the memory-ownership model.
 - Raylib requires a display at runtime. In a headless Docker/CI environment, use `xvfb-run` to launch the player, or only compile-test it.
+- `Frontend.c` intentionally comments out `yy_delete_buffer` in `destroyInputBuffer` to avoid a double-free; leaving it commented leaks memory only on syntax errors inside secondary input buffers.
