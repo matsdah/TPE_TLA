@@ -16,7 +16,16 @@ jobs:
             cmake \
             flex \
             gcc \
-            make
+            g++ \
+            git \
+            make \
+            libglfw3-dev \
+            libx11-dev \
+            libxrandr-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxcursor-dev \
+            libgl1-mesa-dev
           chmod u+x --recursive src/main/bash
       - name: "Build."
         run: |

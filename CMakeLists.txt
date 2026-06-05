@@ -10,6 +10,15 @@ project(Flex-Bison-Compiler C)
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	message(NOTICE "The C compiler is GCC.")
 
+	# Fetches and builds Raylib from source so it inherits our GCC flags (e.g., -fsanitize=address).
+	include(FetchContent)
+	FetchContent_Declare(
+		raylib
+		GIT_REPOSITORY https://github.com/raysan5/raylib.git
+		GIT_TAG        5.5
+	)
+	FetchContent_MakeAvailable(raylib)
+
 	# Compiles the parser with Bison, generating counter-examples in case S/R or R/R conflicts exists.
 	add_custom_command(
 		OUTPUT ../src/main/c/frontend/syntactic-analysis/BisonParser.c ../src/main/c/frontend/syntactic-analysis/BisonParser.h
@@ -49,7 +58,13 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	)
 
 	# Link final project and libraries.
-	target_link_libraries(Flex-Bison-Compiler)
+	target_link_libraries(Flex-Bison-Compiler raylib m)
+
+	# Defines the visual-novel player entry-point and its source files.
+	add_executable(Flex-Bison-Player
+		src/main/c/player/PlayerEntryPoint.c
+	)
+	target_link_libraries(Flex-Bison-Player raylib m)
 else ()
 	message(NOTICE "The C compiler is unknown.")
 endif ()
