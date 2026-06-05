@@ -2,6 +2,7 @@
 #define ENGINE_HEADER
 
 #include "StoryLoader.h"
+#include <raylib.h>
 #include <stdbool.h>
 
 /* Context stack depth limit */
@@ -26,5 +27,10 @@ int Engine_getChoiceCount(const Engine * engine);
 const char * Engine_getChoiceText(const Engine * engine, int index);
 
 Scene * Engine_getCurrentScene(const Engine * engine);
+
+/* Media state */
+Texture2D Engine_getBackgroundTexture(const Engine * engine);
+Texture2D Engine_getSpriteTexture(const Engine * engine);
+void Engine_updateAudio(Engine * engine);
 
 #endif

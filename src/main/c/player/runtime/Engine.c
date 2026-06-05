@@ -21,11 +21,19 @@ struct Engine {
 	const char * currentActorId;
 	const char * currentDialogueText;
 	ChoiceOption * currentChoices;
-	/* Renderer / audio state flags (to be used by Phase 3) */
+	/* Renderer / audio state */
 	char * shownBackground;
 	char * shownSprite;
 	char * playingMusic;
 	char * playingSound;
+	Texture2D bgTexture;
+	Texture2D spriteTexture;
+	Music currentMusic;
+	Sound currentSound;
+	bool bgTextureLoaded;
+	bool spriteTextureLoaded;
+	bool musicPlaying;
+	bool soundPlaying;
 };
 
 /* ── Helpers ────────────────────────────────────────────────────────── */
@@ -92,6 +100,13 @@ static void _clearWaiting(Engine * engine) {
 
 static void _stepNext(Engine * engine);
 
+static const char * _resolveAssetPath(Engine * engine, const char * resourceId) {
+	for (Asset * a = engine->story->assets; a != NULL; a = a->next) {
+		if (strcmp(a->id, resourceId) == 0) return a->path;
+	}
+	return NULL;
+}
+
 /* ── Core stepping logic ────────────────────────────────────────────── */
 
 static void _stepStatement(Engine * engine, Statement * stmt) {
@@ -108,10 +123,40 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 				free(engine->shownBackground);
 				engine->shownBackground = (char *) malloc(strlen(stmt->show.resourceId) + 1);
 				strcpy(engine->shownBackground, stmt->show.resourceId);
+				if (engine->bgTextureLoaded) {
+					UnloadTexture(engine->bgTexture);
+					engine->bgTextureLoaded = false;
+				}
+				const char * path = _resolveAssetPath(engine, stmt->show.resourceId);
+				if (path != NULL) {
+					engine->bgTexture = LoadTexture(path);
+					if (engine->bgTexture.id != 0) {
+						engine->bgTextureLoaded = true;
+					} else {
+						fprintf(stderr, "Engine: failed to load background texture '%s'\n", path);
+					}
+				} else {
+					fprintf(stderr, "Engine: asset '%s' not found for background show\n", stmt->show.resourceId);
+				}
 			} else {
 				free(engine->shownSprite);
 				engine->shownSprite = (char *) malloc(strlen(stmt->show.resourceId) + 1);
 				strcpy(engine->shownSprite, stmt->show.resourceId);
+				if (engine->spriteTextureLoaded) {
+					UnloadTexture(engine->spriteTexture);
+					engine->spriteTextureLoaded = false;
+				}
+				const char * path = _resolveAssetPath(engine, stmt->show.resourceId);
+				if (path != NULL) {
+					engine->spriteTexture = LoadTexture(path);
+					if (engine->spriteTexture.id != 0) {
+						engine->spriteTextureLoaded = true;
+					} else {
+						fprintf(stderr, "Engine: failed to load sprite texture '%s'\n", path);
+					}
+				} else {
+					fprintf(stderr, "Engine: asset '%s' not found for sprite show\n", stmt->show.resourceId);
+				}
 			}
 			_stepNext(engine);
 			break;
@@ -119,8 +164,16 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 		case STMT_HIDE:
 			if (strcmp(stmt->hide.target, "background") == 0) {
 				free(engine->shownBackground); engine->shownBackground = NULL;
+				if (engine->bgTextureLoaded) {
+					UnloadTexture(engine->bgTexture);
+					engine->bgTextureLoaded = false;
+				}
 			} else {
 				free(engine->shownSprite); engine->shownSprite = NULL;
+				if (engine->spriteTextureLoaded) {
+					UnloadTexture(engine->spriteTexture);
+					engine->spriteTextureLoaded = false;
+				}
 			}
 			_stepNext(engine);
 			break;
@@ -130,10 +183,43 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 				free(engine->playingMusic);
 				engine->playingMusic = (char *) malloc(strlen(stmt->play.resourceId) + 1);
 				strcpy(engine->playingMusic, stmt->play.resourceId);
+				if (engine->musicPlaying) {
+					StopMusicStream(engine->currentMusic);
+					UnloadMusicStream(engine->currentMusic);
+					engine->musicPlaying = false;
+				}
+				const char * path = _resolveAssetPath(engine, stmt->play.resourceId);
+				if (path != NULL) {
+					engine->currentMusic = LoadMusicStream(path);
+					if (engine->currentMusic.stream.buffer != NULL) {
+						PlayMusicStream(engine->currentMusic);
+						engine->musicPlaying = true;
+					} else {
+						fprintf(stderr, "Engine: failed to load music '%s'\n", path);
+					}
+				} else {
+					fprintf(stderr, "Engine: asset '%s' not found for music play\n", stmt->play.resourceId);
+				}
 			} else {
 				free(engine->playingSound);
 				engine->playingSound = (char *) malloc(strlen(stmt->play.resourceId) + 1);
 				strcpy(engine->playingSound, stmt->play.resourceId);
+				if (engine->soundPlaying) {
+					UnloadSound(engine->currentSound);
+					engine->soundPlaying = false;
+				}
+				const char * path = _resolveAssetPath(engine, stmt->play.resourceId);
+				if (path != NULL) {
+					engine->currentSound = LoadSound(path);
+					if (engine->currentSound.stream.buffer != NULL) {
+						PlaySound(engine->currentSound);
+						engine->soundPlaying = true;
+					} else {
+						fprintf(stderr, "Engine: failed to load sound '%s'\n", path);
+					}
+				} else {
+					fprintf(stderr, "Engine: asset '%s' not found for sound play\n", stmt->play.resourceId);
+				}
 			}
 			_stepNext(engine);
 			break;
@@ -141,8 +227,17 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 		case STMT_STOP:
 			if (strcmp(stmt->stop.target, "music") == 0) {
 				free(engine->playingMusic); engine->playingMusic = NULL;
+				if (engine->musicPlaying) {
+					StopMusicStream(engine->currentMusic);
+					UnloadMusicStream(engine->currentMusic);
+					engine->musicPlaying = false;
+				}
 			} else {
 				free(engine->playingSound); engine->playingSound = NULL;
+				if (engine->soundPlaying) {
+					UnloadSound(engine->currentSound);
+					engine->soundPlaying = false;
+				}
 			}
 			_stepNext(engine);
 			break;
@@ -243,6 +338,15 @@ Engine * Engine_create(Story * story) {
 
 void Engine_destroy(Engine * engine) {
 	if (engine == NULL) return;
+	if (engine->bgTextureLoaded) UnloadTexture(engine->bgTexture);
+	if (engine->spriteTextureLoaded) UnloadTexture(engine->spriteTexture);
+	if (engine->musicPlaying) {
+		StopMusicStream(engine->currentMusic);
+		UnloadMusicStream(engine->currentMusic);
+	}
+	if (engine->soundPlaying) {
+		UnloadSound(engine->currentSound);
+	}
 	free(engine->shownBackground);
 	free(engine->shownSprite);
 	free(engine->playingMusic);
@@ -323,4 +427,22 @@ Scene * Engine_getCurrentScene(const Engine * engine) {
 		if (s->statements == ctx->list) return s;
 	}
 	return NULL;
+}
+
+/* ── Media getters ─────────────────────────────────────────────────── */
+
+Texture2D Engine_getBackgroundTexture(const Engine * engine) {
+	if (engine == NULL || !engine->bgTextureLoaded) return (Texture2D){0};
+	return engine->bgTexture;
+}
+
+Texture2D Engine_getSpriteTexture(const Engine * engine) {
+	if (engine == NULL || !engine->spriteTextureLoaded) return (Texture2D){0};
+	return engine->spriteTexture;
+}
+
+void Engine_updateAudio(Engine * engine) {
+	if (engine != NULL && engine->musicPlaying) {
+		UpdateMusicStream(engine->currentMusic);
+	}
 }

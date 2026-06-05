@@ -8,6 +8,9 @@ C compiler for a visual-novel / story DSL, built with **Flex + Bison + CMake + G
 
 - **Compiler entry point:** `src/main/c/EntryPoint.c`
 - **Player entry point:** `src/main/c/player/PlayerEntryPoint.c`
+- **Compiler phases:** Lexical analysis → Syntactic analysis → **Semantic analysis** → Code generation (JSON). The semantic analyzer validates undeclared actors/assets/scenes, duplicate declarations, and type mismatches.
+- **Compiler modules:**
+  - `src/main/c/frontend/semantic-analysis/SemanticAnalyzer.c` — validates the AST before code generation (actors, assets, scenes, variables, expressions).
 - **Player runtime modules:**
   - `src/main/c/player/runtime/StoryLoader.c` — parses `.build/story.json` into an in-memory runtime model (`Story`, `Scene`, `Statement`, etc.).
   - `src/main/c/player/runtime/ExpressionEvaluator.c` — evaluates integer expressions and conditions against the runtime variable table.

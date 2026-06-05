@@ -48,19 +48,21 @@ const int main(const int length, const char ** arguments) {
 	StoryLoader_resolveAssetPaths(story, dir);
 	free(pathCopy);
 
-	Engine * engine = Engine_create(story);
-	if (engine == NULL) {
-		StoryLoader_destroy(story);
-		return 1;
-	}
-
 	const int screenWidth = 800;
 	const int screenHeight = 600;
 	InitWindow(screenWidth, screenHeight, "Flex-Bison-Player");
 	SetTargetFPS(60);
 
+	Engine * engine = Engine_create(story);
+	if (engine == NULL) {
+		StoryLoader_destroy(story);
+		CloseWindow();
+		return 1;
+	}
+
 	while (!WindowShouldClose() && !Engine_isFinished(engine)) {
 		Engine_update(engine);
+		Engine_updateAudio(engine);
 
 		/* Input handling */
 		if (IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -82,9 +84,23 @@ const int main(const int length, const char ** arguments) {
 		BeginDrawing();
 		ClearBackground(BLACK);
 
-		/* Background placeholder (Phase 3 will load actual textures) */
-		if (Engine_getCurrentScene(engine) != NULL) {
+		/* Background rendering */
+		Texture2D bg = Engine_getBackgroundTexture(engine);
+		if (bg.id != 0) {
+			DrawTexturePro(bg,
+				(Rectangle){0, 0, (float)bg.width, (float)bg.height},
+				(Rectangle){0, 0, (float)screenWidth, (float)screenHeight},
+				(Vector2){0, 0}, 0.0f, WHITE);
+		} else if (Engine_getCurrentScene(engine) != NULL) {
 			DrawRectangle(0, 0, screenWidth, screenHeight, DARKGRAY);
+		}
+
+		/* Sprite rendering */
+		Texture2D spr = Engine_getSpriteTexture(engine);
+		if (spr.id != 0) {
+			int x = (screenWidth - spr.width) / 2;
+			int y = (screenHeight - spr.height) / 2 - 50;
+			DrawTexture(spr, x, y, WHITE);
 		}
 
 		/* Dialogue box */
