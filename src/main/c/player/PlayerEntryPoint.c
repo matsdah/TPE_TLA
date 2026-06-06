@@ -51,6 +51,7 @@ const int main(const int length, const char ** arguments) {
 	const int screenWidth = 800;
 	const int screenHeight = 600;
 	InitWindow(screenWidth, screenHeight, "Flex-Bison-Player");
+	InitAudioDevice();
 	SetTargetFPS(60);
 
 	Engine * engine = Engine_create(story);
@@ -131,8 +132,9 @@ const int main(const int length, const char ** arguments) {
 		EndDrawing();
 	}
 
-	CloseWindow();
 	Engine_destroy(engine);
+	CloseAudioDevice();
+	CloseWindow();
 	StoryLoader_destroy(story);
 	return 0;
 }

@@ -58,6 +58,7 @@ src/main/bash/test.sh
   cat src/test/c/accept/01-linear-scene | .build/Flex-Bison-Compiler src/test/c/accept/01-linear-scene
   ```
 - The suite also verifies that `.build/story.json` is non-empty after compiling `src/test/c/accept/01-linear-scene`.
+- The suite includes a **player smoke-test** (compiles `06-graphics` and runs the player under `xvfb-run` when headless) to verify the player binary does not crash.
 
 ## Docker Dev Environment
 
@@ -77,7 +78,7 @@ docker compose down
 
 - Workflow: `.github/workflows/pipeline.yaml`
 - Triggers on every `push` and on PR `closed` / `reopened`.
-- Installs `bison cmake flex gcc g++ git make` plus `libglfw3-dev libx11-dev libxrandr-dev libxi-dev libxinerama-dev libxcursor-dev libgl1-mesa-dev` for Raylib compilation, makes bash scripts executable, then runs `build.sh` followed by `test.sh`.
+- Installs `bison cmake flex gcc g++ git make xvfb` plus `libglfw3-dev libx11-dev libxrandr-dev libxi-dev libxinerama-dev libxcursor-dev libgl1-mesa-dev` for Raylib compilation, makes bash scripts executable, then runs `build.sh`, `test.sh`, and a dedicated `"Player test."` step.
 
 ## Gotchas
 
@@ -85,3 +86,7 @@ docker compose down
 - `BisonGrammar.y` uses `%define api.push-pull push`, `%define api.pure full`, and `%destructor` rules for every allocated semantic value. Do not change those directives without understanding the memory-ownership model.
 - Raylib requires a display at runtime. In a headless Docker/CI environment, use `xvfb-run` to launch the player, or only compile-test it.
 - `Frontend.c` intentionally comments out `yy_delete_buffer` in `destroyInputBuffer` to avoid a double-free; leaving it commented leaks memory only on syntax errors inside secondary input buffers.
+- **`play.sh` auto-detects headless environments:** When `DISPLAY` is missing and `xvfb-run` is available, the script wraps the player automatically. No manual `xvfb-run` needed.
+- **Player teardown order is critical:** `Engine_destroy` must run **before** `CloseAudioDevice()` and `CloseWindow()` or AddressSanitizer catches leaks. Raylib's `UnloadTexture`/`UnloadMusicStream` need active GL/audio contexts to free resources.
+- **Asset path resolution:** Asset paths in stories are resolved relative to `.build/story.json`'s directory (`.build/`). Stories that reference repo-root assets need a `../` prefix (e.g., `asset bg = "../src/test/assets/img/background.png"`).
+- **Test assets:** `src/test/assets/` contains generated PNG/WAV files and `test_with_assets.story` for manual visual/audio verification.

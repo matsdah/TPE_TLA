@@ -189,14 +189,18 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 					engine->musicPlaying = false;
 				}
 				const char * path = _resolveAssetPath(engine, stmt->play.resourceId);
-				if (path != NULL) {
-					engine->currentMusic = LoadMusicStream(path);
-					if (engine->currentMusic.stream.buffer != NULL) {
+				if (path != NULL && IsAudioDeviceReady()) {
+					Music loaded = LoadMusicStream(path);
+					if (loaded.stream.buffer != NULL) {
+						engine->currentMusic = loaded;
 						PlayMusicStream(engine->currentMusic);
 						engine->musicPlaying = true;
 					} else {
 						fprintf(stderr, "Engine: failed to load music '%s'\n", path);
+						UnloadMusicStream(loaded);
 					}
+				} else if (path != NULL) {
+					fprintf(stderr, "Engine: audio device not available, skipping music '%s'\n", path);
 				} else {
 					fprintf(stderr, "Engine: asset '%s' not found for music play\n", stmt->play.resourceId);
 				}
@@ -209,14 +213,18 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 					engine->soundPlaying = false;
 				}
 				const char * path = _resolveAssetPath(engine, stmt->play.resourceId);
-				if (path != NULL) {
-					engine->currentSound = LoadSound(path);
-					if (engine->currentSound.stream.buffer != NULL) {
+				if (path != NULL && IsAudioDeviceReady()) {
+					Sound loaded = LoadSound(path);
+					if (loaded.stream.buffer != NULL) {
+						engine->currentSound = loaded;
 						PlaySound(engine->currentSound);
 						engine->soundPlaying = true;
 					} else {
 						fprintf(stderr, "Engine: failed to load sound '%s'\n", path);
+						UnloadSound(loaded);
 					}
+				} else if (path != NULL) {
+					fprintf(stderr, "Engine: audio device not available, skipping sound '%s'\n", path);
 				} else {
 					fprintf(stderr, "Engine: asset '%s' not found for sound play\n", stmt->play.resourceId);
 				}
