@@ -13,4 +13,8 @@ if [ ! -f "$STORY_JSON" ]; then
 	exit 1
 fi
 
-"./.build/Flex-Bison-Player" "$STORY_JSON"
+if [ -z "${DISPLAY:-}" ] && command -v xvfb-run >/dev/null 2>&1; then
+	xvfb-run --auto-servernum "./.build/Flex-Bison-Player" "$STORY_JSON"
+else
+	"./.build/Flex-Bison-Player" "$STORY_JSON"
+fi

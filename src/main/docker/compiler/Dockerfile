@@ -18,4 +18,5 @@ RUN apt-get update --yes \
 		libxinerama-dev \
 		libxcursor-dev \
 		libgl1-mesa-dev \
+		xvfb \
 	&& rm --force --recursive /var/lib/apt/lists/*

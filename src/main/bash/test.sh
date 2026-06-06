@@ -53,5 +53,28 @@ else
 fi
 echo ""
 
+echo "Player should run a compiled story without crashing..."
+echo ""
+
+PLAYER_TEST_FILE="src/test/c/accept/06-graphics"
+cat "$PLAYER_TEST_FILE" | ".build/Flex-Bison-Compiler" "$PLAYER_TEST_FILE" >/dev/null 2>&1
+if [ -n "${DISPLAY:-}" ] || command -v xvfb-run >/dev/null 2>&1; then
+	if [ -z "${DISPLAY:-}" ]; then
+		xvfb-run --auto-servernum "./.build/Flex-Bison-Player" ".build/story.json" >/dev/null 2>&1
+	else
+		"./.build/Flex-Bison-Player" ".build/story.json" >/dev/null 2>&1
+	fi
+	PLAYER_RESULT="$?"
+	if [ "$PLAYER_RESULT" == "0" ]; then
+		echo -e "    player exit, ${GREEN}clean${OFF} (status $PLAYER_RESULT)"
+	else
+		STATUS=1
+		echo -e "    player exit, ${RED}crashed${OFF} (status $PLAYER_RESULT)"
+	fi
+else
+	echo -e "    player test, ${GREEN}skipped${OFF} (no xvfb or display)"
+fi
+echo ""
+
 echo "All done."
 exit $STATUS

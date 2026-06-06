@@ -25,7 +25,8 @@ jobs:
             libxi-dev \
             libxinerama-dev \
             libxcursor-dev \
-            libgl1-mesa-dev
+            libgl1-mesa-dev \
+            xvfb
           chmod u+x --recursive src/main/bash
       - name: "Build."
         run: |
@@ -33,6 +34,10 @@ jobs:
       - name: "Test."
         run: |
           src/main/bash/test.sh
+      - name: "Player test."
+        run: |
+          src/main/bash/run.sh src/test/c/accept/06-graphics
+          xvfb-run --auto-servernum src/main/bash/play.sh .build/story.json
 
 name: "CI"
 
