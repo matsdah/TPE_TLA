@@ -44,6 +44,16 @@ src/main/bash/run.sh <program-file>
 src/main/bash/play.sh [.build/story.json]
 ```
 
+## Player Controls
+
+| Input | Action |
+|-------|--------|
+| `SPACE` or left-click | Advance dialogue (when no choices are active) |
+| `1` – `9` | Select choice option by number |
+| Mouse hover + click on choice rectangle | Select choice option |
+| `F5` | Save game to `.build/save.json` (single slot, silent overwrite) |
+| `F9` | Load game from `.build/save.json` (refused if story source mismatches) |
+
 ## Test
 
 All tests are **integration tests** — no C unit-test framework is used.
@@ -93,3 +103,9 @@ docker compose down
 - **Save/Load system:** Press `F5` to write `.build/save.json`, `F9` to load. The save includes variables, context stack, media state, and pending dialogue/choice. Saves are bound to the story source (from `meta.source` in `story.json`); loading a save from a different story is refused.
 - **Pointer-based context stack:** The engine tracks execution via raw `StatementList *` / `Statement *` pointers. Save/load uses stable string paths (`scene:<name>/stmt:<i>/then`, `.../opt:<j>`) to resolve pointers after process restart. Any structural change to the story (added/removed statements) invalidates existing saves.
 - **Media helpers in Engine.c:** `_applyShowBackground`, `_applyHideSprite`, `_applyPlayMusic`, etc. are reusable helpers used by both `_stepStatement` and `Engine_loadState` to apply media state without executing story statements.
+- **Player init order is critical:** `InitWindow` must run **before** `Engine_create` because `LoadTexture` needs an active OpenGL context. `InitAudioDevice` runs after `InitWindow`.
+- **Context stack limit:** `ENGINE_MAX_CONTEXTS` = 64; overflow silently sets `finished = true` and terminates the story. Deeply nested `choice` → `if` → `goto` chains can hit this.
+- **Expressions are integer-only:** The DSL has no strings, booleans, or logical operators (`&&`, `||`, `!`). Conditions are numeric comparisons only.
+- **Asset type mismatch is NOT validated:** The semantic analyzer does not check that an image asset is used with `show`/`hide` or an audio asset with `play`/`stop`.
+- **`examples/demo.story`:** Exercises every language construct; use it for manual verification of compiler + player end-to-end.
+- **Test asset generation:** `generate_test_assets.py` creates the PNG/WAV files in `src/test/assets/`.
