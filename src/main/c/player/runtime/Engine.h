@@ -27,10 +27,14 @@ int Engine_getChoiceCount(const Engine * engine);
 const char * Engine_getChoiceText(const Engine * engine, int index);
 
 Scene * Engine_getCurrentScene(const Engine * engine);
+Story * Engine_getStory(const Engine * engine);
 
 /* Media state */
 Texture2D Engine_getBackgroundTexture(const Engine * engine);
 Texture2D Engine_getSpriteTexture(const Engine * engine);
 void Engine_updateAudio(Engine * engine);
+
+bool Engine_saveState(Engine * engine, const char * savePath);
+bool Engine_loadState(Engine * engine, const char * savePath);
 
 #endif

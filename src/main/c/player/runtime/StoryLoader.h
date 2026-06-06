@@ -146,6 +146,7 @@ struct Story {
 	Variable * variables;
 	StatementList * declarations;
 	SceneList * scenes;
+	char * source;
 };
 
 /* ── Public API ────────────────────────────────────────────────────── */
@@ -155,6 +156,15 @@ void StoryLoader_destroy(Story * story);
 void StoryLoader_resolveAssetPaths(Story * story, const char * jsonDirectory);
 
 Scene * StoryLoader_findScene(Story * story, const char * name);
+Actor * StoryLoader_findActor(Story * story, const char * id);
+
+/* Path encoding for save/load (stable identifiers across runs) */
+char * StoryLoader_encodeListPath(Story * story, StatementList * list);
+StatementList * StoryLoader_resolveListPath(Story * story, const char * path);
+char * StoryLoader_encodeStatementPath(Story * story, Statement * stmt);
+Statement * StoryLoader_resolveStatementPath(Story * story, const char * path);
+int StoryLoader_getStatementIndex(StatementList * list, Statement * stmt);
+Statement * StoryLoader_getStatementAtIndex(StatementList * list, int index);
 
 /* Helpers for deep copies of sub-structures (used by the engine) */
 StatementList * StoryLoader_cloneStatementList(const StatementList * list);

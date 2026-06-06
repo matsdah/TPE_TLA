@@ -167,6 +167,10 @@ Story * StoryLoader_load(const char * jsonPath) {
 
 	Story * story = (Story *) calloc(1, sizeof(Story));
 
+	/* meta.source */
+	cJSON * meta = cJSON_GetObjectItem(root, "meta");
+	story->source = _strdup(_getString(meta, "source"));
+
 	/* actors */
 	cJSON * actors = cJSON_GetObjectItem(root, "actors");
 	cJSON * a = NULL;
@@ -223,6 +227,7 @@ Story * StoryLoader_load(const char * jsonPath) {
 
 void StoryLoader_destroy(Story * story) {
 	if (story == NULL) return;
+	free(story->source);
 	while (story->actors != NULL) {
 		Actor * next = story->actors->next;
 		free(story->actors->id); free(story->actors->name); free(story->actors->color);
@@ -278,6 +283,167 @@ Scene * StoryLoader_findScene(Story * story, const char * name) {
 	if (story == NULL || story->scenes == NULL || name == NULL) return NULL;
 	for (Scene * s = story->scenes->head; s != NULL; s = s->next) {
 		if (strcmp(s->name, name) == 0) return s;
+	}
+	return NULL;
+}
+
+Actor * StoryLoader_findActor(Story * story, const char * id) {
+	if (story == NULL || id == NULL) return NULL;
+	for (Actor * a = story->actors; a != NULL; a = a->next) {
+		if (strcmp(a->id, id) == 0) return a;
+	}
+	return NULL;
+}
+
+/* ── Path encoding for save/load (stable identifiers across runs) ─── */
+
+char * StoryLoader_encodeListPath(Story * story, StatementList * list) {
+	if (story == NULL || list == NULL) return NULL;
+	for (Scene * s = story->scenes->head; s != NULL; s = s->next) {
+		if (s->statements == list) {
+			size_t len = strlen("scene:") + strlen(s->name) + 1;
+			char * path = (char *) malloc(len);
+			snprintf(path, len, "scene:%s", s->name);
+			return path;
+		}
+		int stmtIdx = 0;
+		for (Statement * stmt = s->statements->head; stmt != NULL; stmt = stmt->next) {
+			if (stmt->kind == STMT_IF) {
+				if (stmt->if_.thenBlock == list) {
+					size_t len = strlen("scene:") + strlen(s->name) + strlen("/stmt:0/then") + 1;
+					char * path = (char *) malloc(len);
+					snprintf(path, len, "scene:%s/stmt:%d/then", s->name, stmtIdx);
+					return path;
+				}
+				if (stmt->if_.elseBlock == list) {
+					size_t len = strlen("scene:") + strlen(s->name) + strlen("/stmt:0/else") + 1;
+					char * path = (char *) malloc(len);
+					snprintf(path, len, "scene:%s/stmt:%d/else", s->name, stmtIdx);
+					return path;
+				}
+			}
+			if (stmt->kind == STMT_CHOICE) {
+				int optIdx = 0;
+				for (ChoiceOption * opt = stmt->choice.options; opt != NULL; opt = opt->next) {
+					if (opt->body == list) {
+						size_t len = strlen("scene:") + strlen(s->name) + strlen("/stmt:0/opt:0") + 1;
+						char * path = (char *) malloc(len);
+						snprintf(path, len, "scene:%s/stmt:%d/opt:%d", s->name, stmtIdx, optIdx);
+						return path;
+					}
+					optIdx++;
+				}
+			}
+			stmtIdx++;
+		}
+	}
+	return NULL;
+}
+
+StatementList * StoryLoader_resolveListPath(Story * story, const char * path) {
+	if (story == NULL || path == NULL) return NULL;
+	if (strncmp(path, "scene:", 6) != 0) return NULL;
+	const char * sceneName = path + 6;
+	const char * rest = strchr(sceneName, '/');
+	size_t nameLen = (rest != NULL) ? (size_t)(rest - sceneName) : strlen(sceneName);
+
+	Scene * scene = NULL;
+	for (Scene * s = story->scenes->head; s != NULL; s = s->next) {
+		if (strlen(s->name) == nameLen && strncmp(s->name, sceneName, nameLen) == 0) {
+			scene = s;
+			break;
+		}
+	}
+	if (scene == NULL) return NULL;
+	if (rest == NULL) return scene->statements;
+
+	rest++;
+	int stmtIdx;
+	if (sscanf(rest, "stmt:%d", &stmtIdx) != 1) return NULL;
+	const char * p = rest;
+	while (*p != '\0' && *p != '/') p++;
+	if (*p != '/') return NULL;
+	p++;
+
+	Statement * stmt = StoryLoader_getStatementAtIndex(scene->statements, stmtIdx);
+	if (stmt == NULL) return NULL;
+
+	if (strcmp(p, "then") == 0) {
+		if (stmt->kind != STMT_IF) return NULL;
+		return stmt->if_.thenBlock;
+	}
+	if (strcmp(p, "else") == 0) {
+		if (stmt->kind != STMT_IF) return NULL;
+		return stmt->if_.elseBlock;
+	}
+	if (strncmp(p, "opt:", 4) == 0) {
+		int optIdx;
+		if (sscanf(p, "opt:%d", &optIdx) != 1) return NULL;
+		if (stmt->kind != STMT_CHOICE) return NULL;
+		ChoiceOption * opt = stmt->choice.options;
+		int idx = 0;
+		while (opt != NULL && idx < optIdx) { opt = opt->next; idx++; }
+		return opt != NULL ? opt->body : NULL;
+	}
+	return NULL;
+}
+
+char * StoryLoader_encodeStatementPath(Story * story, Statement * stmt) {
+	if (story == NULL || stmt == NULL) return NULL;
+	for (Scene * s = story->scenes->head; s != NULL; s = s->next) {
+		int idx = 0;
+		for (Statement * st = s->statements->head; st != NULL; st = st->next) {
+			if (st == stmt) {
+				size_t len = strlen("scene:") + strlen(s->name) + strlen("/stmt:0") + 1;
+				char * path = (char *) malloc(len);
+				snprintf(path, len, "scene:%s/stmt:%d", s->name, idx);
+				return path;
+			}
+			idx++;
+		}
+	}
+	return NULL;
+}
+
+Statement * StoryLoader_resolveStatementPath(Story * story, const char * path) {
+	if (story == NULL || path == NULL) return NULL;
+	if (strncmp(path, "scene:", 6) != 0) return NULL;
+	const char * sceneName = path + 6;
+	const char * rest = strchr(sceneName, '/');
+	if (rest == NULL) return NULL;
+	size_t nameLen = (size_t)(rest - sceneName);
+
+	Scene * scene = NULL;
+	for (Scene * s = story->scenes->head; s != NULL; s = s->next) {
+		if (strlen(s->name) == nameLen && strncmp(s->name, sceneName, nameLen) == 0) {
+			scene = s;
+			break;
+		}
+	}
+	if (scene == NULL) return NULL;
+
+	rest++;
+	int stmtIdx;
+	if (sscanf(rest, "stmt:%d", &stmtIdx) != 1) return NULL;
+	return StoryLoader_getStatementAtIndex(scene->statements, stmtIdx);
+}
+
+int StoryLoader_getStatementIndex(StatementList * list, Statement * stmt) {
+	if (list == NULL || stmt == NULL) return -1;
+	int idx = 0;
+	for (Statement * s = list->head; s != NULL; s = s->next) {
+		if (s == stmt) return idx;
+		idx++;
+	}
+	return -1;
+}
+
+Statement * StoryLoader_getStatementAtIndex(StatementList * list, int index) {
+	if (list == NULL || index < 0) return NULL;
+	int idx = 0;
+	for (Statement * s = list->head; s != NULL; s = s->next) {
+		if (idx == index) return s;
+		idx++;
 	}
 	return NULL;
 }

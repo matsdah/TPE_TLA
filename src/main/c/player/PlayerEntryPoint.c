@@ -6,6 +6,18 @@
 #include "runtime/StoryLoader.h"
 #include "runtime/Engine.h"
 
+static Color _parseColor(const char * hex) {
+	Color fallback = YELLOW;
+	if (hex == NULL || hex[0] != '#') return fallback;
+	int len = (int) strlen(hex);
+	if (len != 7) return fallback;
+	unsigned int r = 0, g = 0, b = 0;
+	if (sscanf(hex + 1, "%2x%2x%2x", &r, &g, &b) == 3) {
+		return (Color){ (unsigned char) r, (unsigned char) g, (unsigned char) b, 255 };
+	}
+	return fallback;
+}
+
 static void _drawWrappedText(const char * text, int x, int y, int fontSize, int maxWidth, Color color) {
 	/* Naive word-wrap for Raylib's DrawText */
 	if (text == NULL) return;
@@ -61,6 +73,10 @@ const int main(const int length, const char ** arguments) {
 		return 1;
 	}
 
+	int saveNotifyTimer = 0;
+	const char * saveNotifyText = NULL;
+	const char * savePath = ".build/save.json";
+
 	while (!WindowShouldClose() && !Engine_isFinished(engine)) {
 		Engine_update(engine);
 		Engine_updateAudio(engine);
@@ -72,13 +88,43 @@ const int main(const int length, const char ** arguments) {
 			}
 		}
 
-		/* Choice selection via keyboard numbers */
-		if (Engine_isWaitingForInput(engine) && Engine_getChoiceCount(engine) > 0) {
-			for (int i = 0; i < Engine_getChoiceCount(engine) && i < 9; i++) {
+		/* Choice selection via keyboard numbers and mouse */
+		int choiceCount = Engine_getChoiceCount(engine);
+		if (Engine_isWaitingForInput(engine) && choiceCount > 0) {
+			for (int i = 0; i < choiceCount && i < 9; i++) {
 				if (IsKeyPressed(KEY_ONE + i)) {
 					Engine_selectChoice(engine, i);
 					break;
 				}
+			}
+			Vector2 mouse = GetMousePosition();
+			int boxY = screenHeight - 40 - choiceCount * 40;
+			for (int i = 0; i < choiceCount; i++) {
+				Rectangle choiceRect = { 60.0f, (float)(boxY + i * 40), (float)(screenWidth - 120), 32.0f };
+				if (CheckCollisionPointRec(mouse, choiceRect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+					Engine_selectChoice(engine, i);
+					break;
+				}
+			}
+		}
+
+		/* Save / Load */
+		if (IsKeyPressed(KEY_F5)) {
+			if (Engine_saveState(engine, savePath)) {
+				saveNotifyText = "Game saved.";
+				saveNotifyTimer = 120;
+			} else {
+				saveNotifyText = "Save failed.";
+				saveNotifyTimer = 120;
+			}
+		}
+		if (IsKeyPressed(KEY_F9)) {
+			if (Engine_loadState(engine, savePath)) {
+				saveNotifyText = "Game loaded.";
+				saveNotifyTimer = 120;
+			} else {
+				saveNotifyText = "Load failed / mismatch.";
+				saveNotifyTimer = 120;
 			}
 		}
 
@@ -105,28 +151,41 @@ const int main(const int length, const char ** arguments) {
 		}
 
 		/* Dialogue box */
-		const char * actor = Engine_getCurrentDialogueActor(engine);
+		const char * actorId = Engine_getCurrentDialogueActor(engine);
 		const char * dialogue = Engine_getCurrentDialogueText(engine);
 		if (dialogue != NULL) {
 			int boxY = screenHeight - 180;
 			DrawRectangle(20, boxY, screenWidth - 40, 160, (Color){0, 0, 0, 200});
-			if (actor != NULL) {
-				DrawText(actor, 40, boxY + 10, 24, YELLOW);
+			if (actorId != NULL) {
+				Actor * actorInfo = StoryLoader_findActor(Engine_getStory(engine), actorId);
+				const char * displayName = (actorInfo != NULL && actorInfo->name != NULL) ? actorInfo->name : actorId;
+				Color nameColor = (actorInfo != NULL && actorInfo->color != NULL) ? _parseColor(actorInfo->color) : YELLOW;
+				DrawText(displayName, 40, boxY + 10, 24, nameColor);
 			}
 			_drawWrappedText(dialogue, 40, boxY + 45, 20, screenWidth - 80, WHITE);
 			DrawText("[SPACE / Click to continue]", 40, boxY + 140, 16, LIGHTGRAY);
 		}
 
 		/* Choice menu */
-		int choiceCount = Engine_getChoiceCount(engine);
 		if (choiceCount > 0) {
 			int boxY = screenHeight - 40 - choiceCount * 40;
+			Vector2 mouse = GetMousePosition();
 			for (int i = 0; i < choiceCount; i++) {
 				const char * text = Engine_getChoiceText(engine, i);
 				if (text == NULL) continue;
-				DrawRectangle(60, boxY + i * 40, screenWidth - 120, 32, DARKBLUE);
-				DrawText(TextFormat("%d. %s", i + 1, text), 70, boxY + i * 40 + 6, 20, WHITE);
+				Rectangle choiceRect = { 60.0f, (float)(boxY + i * 40), (float)(screenWidth - 120), 32.0f };
+				bool hovered = CheckCollisionPointRec(mouse, choiceRect);
+				Color rectColor = hovered ? SKYBLUE : DARKBLUE;
+				Color textColor = hovered ? BLACK : WHITE;
+				DrawRectangleRec(choiceRect, rectColor);
+				DrawText(TextFormat("%d. %s", i + 1, text), 70, boxY + i * 40 + 6, 20, textColor);
 			}
+		}
+
+		/* Save/Load notification */
+		if (saveNotifyTimer > 0) {
+			DrawText(saveNotifyText, 20, 20, 20, GREEN);
+			saveNotifyTimer--;
 		}
 
 		EndDrawing();
