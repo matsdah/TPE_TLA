@@ -24,20 +24,20 @@ static void _drawWrappedText(const char * text, int x, int y, int fontSize, int 
 	const char * word = text;
 	int cursorX = x;
 	int cursorY = y;
-	while (*word != '\0') {
-		const char * end = word;
-		while (*end != '\0' && *end != ' ') end++;
-		int len = (int)(end - word);
-		int wordWidth = MeasureText(word, fontSize);
-		if (cursorX + wordWidth > x + maxWidth && cursorX != x) {
-			cursorX = x;
-			cursorY += fontSize + 4;
-		}
-		DrawText(word, cursorX, cursorY, fontSize, color);
-		cursorX += wordWidth + MeasureText(" ", fontSize);
-		if (*end == ' ') end++;
-		word = end;
+
+	const char * end = word;
+	while (*end != '\0' && *end != ' ') end++;
+	int len = (int)(end - word);
+	int wordWidth = MeasureText(word, fontSize);
+	if (cursorX + wordWidth > x + maxWidth && cursorX != x) {
+		cursorX = x;
+		cursorY += fontSize + 4;
 	}
+	DrawText(word, cursorX, cursorY, fontSize, color);
+	cursorX += wordWidth + MeasureText(" ", fontSize);
+	if (*end == ' ') end++;
+	word = end;
+
 }
 
 const int main(const int length, const char ** arguments) {
