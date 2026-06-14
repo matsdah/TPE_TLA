@@ -311,6 +311,7 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 			engine->stackTop = -1;
 			if (target != NULL) {
 				_pushContext(engine, target->statements);
+				_stepNext(engine);
 			} else {
 				fprintf(stderr, "Engine: goto target scene '%s' not found\n", stmt->goto_.sceneName);
 				engine->finished = true;
@@ -332,13 +333,13 @@ static void _stepStatement(Engine * engine, Statement * stmt) {
 		{
 			bool result = ExpressionEvaluator_test(engine->story, stmt->if_.condition);
 			StatementList * block = result ? stmt->if_.thenBlock : stmt->if_.elseBlock;
-			if (block != NULL) {
+			/* Only push the block if it actually has statements to run. */
+			if (block != NULL && block->head != NULL) {
 				_pushContext(engine, block);
 			}
-			/* if the block is empty, just step next in current context */
-			if (block == NULL || block->head == NULL) {
-				_stepNext(engine);
-			}
+			/* Always advance: if a block was pushed this executes its first
+			 * statement; otherwise it continues in the current context. */
+			_stepNext(engine);
 			break;
 		}
 

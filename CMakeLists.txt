@@ -12,11 +12,13 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 
 	# Fetches and builds Raylib from source so it inherits our GCC flags (e.g., -fsanitize=address).
 	include(FetchContent)
+	set(FETCHCONTENT_QUIET OFF)
 	FetchContent_Declare(
 		raylib
 		GIT_REPOSITORY https://github.com/raysan5/raylib.git
 		GIT_TAG        5.5
 	)
+	set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 	FetchContent_MakeAvailable(raylib)
 
 	# Compiles the parser with Bison, generating counter-examples in case S/R or R/R conflicts exists.
@@ -31,6 +33,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	add_compile_options(-static-libgcc)
 	add_compile_options(-std=gnu99)
 	add_link_options(-fsanitize=address)
+	add_link_options(-static-libasan)
 
 	# Compiles the scanner with Flex.
 	add_custom_command(
