@@ -32,12 +32,14 @@ services:
         required: false
     environment:
       <<: *environment
+      DISPLAY: "${DISPLAY:-:0}"
     networks:
       ar-edu-itba-atlyc:
         aliases:
           - "compiler.atlyc.itba.edu.ar"
-    pull_policy: "every_7d"
+    pull_policy: "missing"
     user: "ubuntu:ubuntu"
     volumes:
       - ".:/home/ubuntu/Flex-Bison-Compiler"
+      - "/tmp/.X11-unix:/tmp/.X11-unix"
     working_dir: "/home/ubuntu/Flex-Bison-Compiler"
